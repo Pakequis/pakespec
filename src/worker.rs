@@ -133,17 +133,17 @@ fn run(source: Source, commands: Receiver<Command>, events: Sender<Event>, wake:
             Some(c) => Some(c),
             None if matches!(mode, Mode::Idle) => match commands.recv() {
                 Ok(c) => Some(c),
-                Err(_) => return,
+                Err(_) => break,
             },
             None => match commands.try_recv() {
                 Ok(c) => Some(c),
                 Err(TryRecvError::Empty) => None,
-                Err(TryRecvError::Disconnected) => return,
+                Err(TryRecvError::Disconnected) => break,
             },
         };
 
         match command {
-            Some(Command::Quit) => return,
+            Some(Command::Quit) => break,
             Some(Command::Stop) => {
                 if let (Mode::Generating, Some(b)) = (&mode, board.as_mut()) {
                     let _ = b.set_fixed_frequency(0);
@@ -245,6 +245,16 @@ fn run(source: Source, commands: Receiver<Command>, events: Sender<Event>, wake:
             _ => {}
         }
     }
+
+    leave_output_off(&mode, &mut board);
+}
+
+/// The board keeps a generator running until told to stop, so the worker stops it
+/// before it ends. Nothing can do this when the process is killed.
+fn leave_output_off(mode: &Mode, board: &mut Option<Board<Box<dyn Transport>>>) {
+    if let (Mode::Generating, Some(b)) = (mode, board.as_mut()) {
+        let _ = b.set_fixed_frequency(0);
+    }
 }
 
 /// Opens the board if needed; reports a failure and returns `false` when it cannot.
@@ -330,6 +340,30 @@ mod tests {
         assert!(readings.iter().all(|&v| v > 250), "{readings:?}");
         worker.generator_off();
         while !matches!(next(&worker), Event::Stopped) {}
+    }
+
+    #[test]
+    fn leaving_while_generating_turns_the_output_off() {
+        let mut board = Some(Board::new(Box::new(SimBoard::new()) as Box<dyn Transport>));
+        let b = board.as_mut().unwrap();
+        b.set_fixed_frequency(940_000_000).unwrap();
+        assert!(b.measure().unwrap() > 250);
+
+        leave_output_off(&Mode::Generating, &mut board);
+        assert!(board.as_mut().unwrap().measure().unwrap() < 250);
+    }
+
+    #[test]
+    fn leaving_while_idle_does_not_touch_the_output() {
+        let mut board = Some(Board::new(Box::new(SimBoard::new()) as Box<dyn Transport>));
+        board
+            .as_mut()
+            .unwrap()
+            .set_fixed_frequency(940_000_000)
+            .unwrap();
+
+        leave_output_off(&Mode::Idle, &mut board);
+        assert!(board.as_mut().unwrap().measure().unwrap() > 250);
     }
 
     #[test]

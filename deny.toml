@@ -28,3 +28,11 @@ wildcards = "deny"
 
 [advisories]
 version = 2
+# These crates are flagged as unmaintained (no vulnerability) and no safe
+# upgrade exists. They are pulled in only on Linux, through eframe's
+# accessibility support (accesskit_unix). Review when eframe updates.
+ignore = [
+    "RUSTSEC-2026-0370", # zvariant
+    "RUSTSEC-2026-0371", # zbus_names
+    "RUSTSEC-2026-0372", # zvariant_derive
+]
