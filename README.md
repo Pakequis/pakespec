@@ -14,6 +14,8 @@ Years later the comments on that post were still about the same thing: the softw
 
 Pakespec started as a serial port and a lot of experiments, until the board's protocol made sense. It multiplies every frequency by 10, ignores commands while it sweeps and goes mute if it receives one it does not know. Everything I found is in [`docs/serial-protocol.md`](docs/serial-protocol.md), and the rest of the story is in [`docs/full-record.md`](docs/full-record.md).
 
+The name is my handle, Pakequis, plus the start of "spectrum": Pakespec.
+
 Want a board to play with? [Here it is on AliExpress](https://s.click.aliexpress.com/e/_c3DrudED) (affiliate link: it costs you nothing extra, and I may earn a small commission).
 
 ## Screenshots
