@@ -14,7 +14,7 @@ The same screen in the dark theme (amber trace), zoomed on 2.1 to 2.6 GHz: Wi-Fi
 
 ## Status (2026-10-17)
 
-Early stage, working on the real board (Linux). Verification on Windows is still to do.
+Early stage, working on the real board on Linux and Windows.
 
 - **Protocol confirmed** on the board (see `docs/serial-protocol.md`): sweep, measure and generator commands, the board multiplies every frequency by 10, steps wrap at 10 MHz.
 - **Rust core** (protocol, board access, simulator) with unit and integration tests, hardware tests that need a board, and a CI workflow.
