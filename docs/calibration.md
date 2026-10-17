@@ -1,6 +1,6 @@
 # dBm calibration with the FY6900 function generator
 
-Status: in progress, first ladder measured on 2026-10-17.
+Status: a built-in scale is in use (see the section on matching the reference scale); the absolute level is still unchecked. Function-generator ladder measured on 2026-10-17.
 
 ## Setup
 
@@ -59,7 +59,7 @@ This scale (5.30 counts/dB) differs from the FY6900 ladder above (8.55 counts/dB
 ```toml
 counts_per_db = 5.30
 raw_at_0_dbm = 455.67
-min_raw = 148.0
+min_raw = 140.0
 max_raw = 500.0
 min_freq_hz = 35000000
 max_freq_hz = 4400000000

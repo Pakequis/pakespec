@@ -15,13 +15,13 @@ These limits shape every feature. All were observed on the board (see `serial-pr
 |---|---|
 | 35 MHz to 4.4 GHz | Frequency range of every screen. |
 | About 780 points per second | 1001 points take 1.28 s; 201 points 0.26 s. Update rate is a trade-off with resolution. |
-| Step between points at most 99.999.999 Hz | Wide ranges need a minimum number of points (45 for the full range). |
+| Step between points below 10 MHz | Wide ranges need a minimum number of points (438 for the full range). |
 | 2 to 9999 points per sweep | Point count limits. |
 | Raw output is a 12-bit ADC value (144 to 182 with nothing connected) | Only about 35 levels at the noise floor; the trace looks stepped until averaged and calibrated. |
 | RBW fixed (5 to 120 kHz according to the manufacturer) | No RBW, VBW, attenuator, preamplifier or detector controls. |
 | RF input at most +5 dBm | The application must warn about input level; there is no protection. |
 | The board does not report its state | No way to read its version reliably or detect a stuck state other than a timeout. |
-| Tracking output level not measured; emission by the `f` command not verified | Generator features are blocked until measured. |
+| Tracking output level not measured | The absolute level of the generator is unknown; the `f` command does put a signal on RF OUT (see `serial-protocol.md`). |
 
 ## 2. Feature list
 
@@ -30,7 +30,7 @@ These limits shape every feature. All were observed on the board (see `serial-pr
 | Id | Feature | Pri | Status | Depends on |
 |---|---|---|---|---|
 | A1 | List serial ports with USB identity and suggest the board (CH340) when exactly one matches | P0 | Done (Linux) | |
-| A2 | Same on Windows (registry) | P0 | Planned | A Windows machine to test |
+| A2 | Same on Windows (registry) | P0 | Done (checked on Windows 10, 2026-10-17) | |
 | A3 | Choose the port by hand; remember the last choice | P0 | Done | |
 | A4 | Never write to a port the user did not select | P0 | Done | |
 | A5 | Clear error when the board is mute, with the unplug and replug advice | P0 | Done | |
@@ -59,7 +59,7 @@ These limits shape every feature. All were observed on the board (see `serial-pr
 |---|---|---|---|---|
 | C1 | Fixed-step vertical scale that follows the data (raw units) | P0 | Done | |
 | C2 | Manual reference level and scale per division | P0 | Done | |
-| C3 | Calibration to dBm from known levels | P0 | Partial: fit, conversion and calibration file in `src/calibration.rs`, dBm column in `pakespec-cli --calibration`; measured 35 to 60 MHz with the FY6900 (`calibration.md`); the screen shows dBm when a calibration file exists (`calibration.toml` next to `settings.toml`), with `approximate dBm` in the header when the trace goes outside the calibrated frequencies and `~` before a marker value that is outside the measured range | Oscilloscope check of the generator amplitude |
+| C3 | Calibration to dBm from known levels | P0 | Partial: fit, conversion and calibration file in `src/calibration.rs`, dBm column in `pakespec-cli --calibration`; a calibration is built in (the scale of the reference program, 35 MHz to 4.4 GHz, relative levels) and a `calibration.toml` next to `settings.toml` replaces it; `approximate dBm` in the header when the trace goes outside the calibrated frequencies and `~` before a marker value outside the measured raw range; a function-generator ladder at 35 to 60 MHz disagrees with the built-in scale (`calibration.md`) | Oscilloscope check of the generator amplitude |
 | C4 | Calibration procedure inside the application, stored in a file per board | P1 | Planned | C3 |
 | C9 | **Automated calibration rig.** A FeelElec FY6900 function generator (DDS, up to 60 MHz) is controlled over its USB serial port by the test scripts, so the calibration runs without anyone present: steps the amplitude in known increments at 35, 50 and 60 MHz, reads the board at each step, and fits the slope (raw units per dB) and the absolute level near 50 MHz. It covers only 35 to 60 MHz. The same rig can supply the 0 dBm at 50 MHz reference for the Anritsu power sensors. Needs: the FY6900 connected by USB, its serial protocol read from its manual, a check of how its displayed amplitude relates to a 50 ohm load (oscilloscope with a 50 ohm termination at a low frequency), and strict limits in the script (start low, never above +5 dBm at the board input, output off at the end). | P1 | Done for 35 to 60 MHz (`calibration.md`); the amplitude check with an oscilloscope is open | The FY6900 on USB; C3 |
 | C5 | Display units dBm, dBµV, W | P2 | Planned | C3 |
@@ -155,13 +155,12 @@ Both are thin front ends over the same core library that the graphical applicati
 | J2 | Release binaries attached to version tags | P0 | Written (`.github/workflows/release.yml`, never run; the packaging steps were checked locally for Linux) | J1 |
 | J3 | License check of every dependency in the pipeline | P0 | Done (passes locally, pipeline never run) | J1 |
 | J4 | Third-party license texts shipped with the binaries | P0 | Done in the release archives (`THIRD-PARTY-NOTICES.md`, `LICENSE`, `README.md`); never run on GitHub | J2 |
-| J5 | Verified on a real Windows machine with the board | P0 | Planned | A Windows machine |
+| J5 | Verified on a real Windows machine with the board | P0 | Done (Windows 10, 2026-10-17; see `testing.md`) | |
 | J6 | Installer or portable package for Windows | P1 | Planned | J2 |
 | J7 | Procedure to test on real hardware, kept in the repository | P1 | Done: `tests/hardware.rs` (ignored by default) | |
 
 ## 3. Acceptance criteria for the P0 features still open
 
-- **A2:** on Windows the board is listed with its USB ids and suggested when it is the only CH340.
 - **B5:** after changing center, span or points, the first points of the new sweep appear within 300 ms, on the real board, with no stuck or wrong data on the next sweeps.
 - **C3 (with C4):** after calibrating, a known signal reads within 1 dB of its true level over the stated range, and the calibration file is kept between runs.
 - **E2:** the marker can be moved with the knob and by typing a frequency; the readout stays in sync.
@@ -173,7 +172,7 @@ Both are thin front ends over the same core library that the graphical applicati
 
 | Version | Contents | Goal |
 |---|---|---|
-| 0.1 | Scope (2026-10-17): show the spectrum, the basic controls of an analyzer and a working generator. Everything P0 except the dBm calibration: A2, E2, H1, H2, J1, J2, J4, J5 (B5 and G2 are done) | A usable viewer and generator, safe to publish, with raw levels |
+| 0.1 | Scope (2026-10-17): show the spectrum, the basic controls of an analyzer and a working generator. Everything P0 except the absolute dBm calibration: E2, H1, H2, J1, J2, J4 (A2, B5, G2 and J5 are done) | A usable viewer and generator, safe to publish, with relative dBm levels |
 | 0.2 | C3, C4, C6, C8, E3, E4, E5, D3, D4, B6, B7 | Real measurements in dBm and a fuller instrument feel |
 | 0.3 | G3 and G4, the absolute output level (G1) | Filter response and a known generator level |
 | 0.4 | K1 | The application controlled from the command line and from other programs |

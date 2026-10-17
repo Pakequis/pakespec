@@ -235,6 +235,9 @@ fn run(source: Source, commands: Receiver<Command>, events: Sender<Event>, wake:
                 match b.measure() {
                     Ok(v) => send(Event::Reading(v)),
                     Err(e) => {
+                        // Try to stop the tone before the port is dropped: the board
+                        // keeps the output on until told otherwise.
+                        let _ = b.set_fixed_frequency(0);
                         mode = Mode::Idle;
                         board = None;
                         send(Event::Failed(e.to_string()));

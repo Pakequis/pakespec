@@ -63,7 +63,7 @@ Old statement, kept for the record: with S1 off nothing arrives at RF IN, whatev
 - Through response, `m` at every MHz from 35 MHz to 4.449 GHz (`experiments/through_response_scan.py`, no reading missing, no dead frequency): median raw value 486 from 35 to 500 MHz (range 484 to 489), 484 from 500 MHz to 1 GHz (476 to 487), 476 from 1 to 2 GHz (464 to 486), 471 from 2 to 3 GHz (406 to 489), 409 from 3 to 4 GHz (367 to 473), 409 from 4 to 4.3 GHz (316 to 425) and 305 from 4.3 to 4.449 GHz (250 to 320). It includes the cable and adapters. An earlier reading of 150 at exactly 4250 MHz was the ignored first `f` after `f000000000`, not a dead frequency.
 - Ten identical full-range sweeps differ by about ±1 per point (maximum 5.5).
 - Forty full-range sweeps of 438 points in a row all completed.
-- The raw values are not calibrated; the conversion to dBm is not known (see below).
+- The raw values are not calibrated by the board; the application converts them to dBm with a calibration (see below).
 
 ## Reception test with an antenna (2026-10-17)
 
@@ -76,9 +76,9 @@ Setup: a dipole of about 10 cm on RF IN, nothing on RF OUT, tracking source off 
 
 Script: `experiments/ambient_antenna_sweep.py` (old, command units; use `pakespec-cli` for new checks).
 
-## dBm calibration (not implemented)
+## dBm calibration
 
-Planned approach: a line defined by two measurements (a known level and the same level attenuated by at least 20 dB): slope = dB difference / raw-value difference. See `next-steps.md`. Open point: the through response above includes the cable and adapters, so the shape of the raw values alone is not the board's response.
+The detector is a straight line in dB. The application ships a scale of 5.30 raw counts per dB (0 dB at 455.67 raw), and a function-generator ladder at 35 to 60 MHz gave 8.55 counts per dB; the two disagree and the absolute level is unchecked. See `calibration.md`. The through response above includes the cable and adapters, so the shape of the raw values alone is not the board's response.
 
 ## Experiments written before the frequency units were known
 

@@ -1,6 +1,6 @@
 # Pakespec
 
-Free, cross-platform (Linux and Windows) software to control the **LTDZ 35M-4400M** family of spectrum analyzer and tracking generator boards (35 MHz to 4.4 GHz, STM32F103 + two ADF4351 + AD8307).
+Free, cross-platform (Linux and Windows) software to control the **LTDZ 35-4400M** family of spectrum analyzer and tracking generator boards (35 MHz to 4.4 GHz, STM32F103 + two ADF4351 + AD8307).
 
 Why: the vendor software for this board is Windows-only and unmaintained, and there is no open, cross-platform client for it.
 
@@ -36,7 +36,7 @@ Early stage, working on the real board on Linux and Windows.
 
 ## Folders
 
-- `src/`: Rust code. `protocol.rs` (wire format), `board.rs` (talking to a board), `sim.rs` (board simulator), `ports.rs` (port detection), `worker.rs` (background sweeps), `theme.rs`, `i18n.rs` and `settings.rs`, `ui/` (egui screens), `bin/` (the application and the sweep-to-CSV tool).
+- `src/`: Rust code. `protocol.rs` (wire format), `board.rs` (talking to a board), `sim.rs` (board simulator), `ports.rs` (port detection), `worker.rs` (background sweeps), `calibration.rs` (raw to dBm), `automation.rs` and `mcp.rs` (command line and MCP server logic), `panel.rs`, `scale.rs` and `trace.rs` (front panel, axis scale and trace data), `theme.rs`, `i18n.rs` and `settings.rs`, `ui/` (egui screens), `bin/` (the application, the command-line tool and the MCP server).
 - `locales/`: interface translations.
 - `tests/`: integration tests against the simulator.
 - `tools/`: standalone Python client used during the research.

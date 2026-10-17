@@ -99,7 +99,7 @@ impl Calibration {
         Calibration {
             counts_per_db: 5.30,
             raw_at_0_dbm: 455.67,
-            min_raw: 148.0,
+            min_raw: 140.0,
             max_raw: 500.0,
             min_freq_hz: 35_000_000,
             max_freq_hz: 4_400_000_000,
@@ -209,6 +209,7 @@ mod tests {
         assert!((c.raw_to_dbm(486.0) - 5.7).abs() < 0.1); // through response
         assert!((c.raw_to_dbm(148.0) + 58.0).abs() < 0.5); // noise floor
         assert!(c.is_trusted(400.0, 3_000_000_000));
+        assert!(c.is_trusted(144.0, 100_000_000)); // lowest noise floor readings
     }
 
     #[test]

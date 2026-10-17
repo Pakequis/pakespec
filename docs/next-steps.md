@@ -4,7 +4,7 @@ Suggested order. Update this file when something is finished or changes.
 
 ## Where the project stands (2026-10-17)
 
-Working on the real board: protocol, board access, simulator, command-line tool (CSV, JSON, `--serve`), MCP server, graphical application with four screen styles, three themes, English and Portuguese, dBm display from 35 to 60 MHz (approximate elsewhere), a generator screen and a license check of every dependency. All hardware tests pass (S1 must be on for them).
+Working on the real board: protocol, board access, simulator, command-line tool (CSV, JSON, `--serve`), MCP server, graphical application with four screen styles, three themes, English and Portuguese, dBm display from a built-in calibration (35 MHz to 4.4 GHz, relative levels), a generator screen and a license check of every dependency. All hardware tests pass (S1 must be on for them).
 
 Known limits, on purpose:
 
@@ -28,7 +28,7 @@ Goal: the application works like a real bench spectrum analyzer. Gaps found so f
 2. **Several markers.** A real analyzer has several markers, delta mode (difference between two points) and a peak table. Here there is one marker (M1) with peak search, next peak and marker to center.
 3. **Trace modes.** Clear and write, average with a counter (`Avg 4/10`), max hold, min hold, view (freeze) and blank. Here: average of 1, 4 or 16, max hold, min hold and clear hold.
 4. **Save and export.** Screenshot and CSV of the trace. Not implemented.
-5. ~~Level in dBm.~~ Done for 35 to 60 MHz (approximate elsewhere).
+5. ~~Level in dBm.~~ Done with a built-in calibration (relative levels; see `calibration.md`).
 6. **Knob and step behavior.** Real analyzers step the span in a 1-2-5 sequence and let the user set the center step. Here the knob steps are proportional to the span.
 7. **Single sweep.** One sweep on demand, besides continuous sweeping.
 8. **Span and center interplay.** Setting the center keeps the center exactly and shrinks the span if it does not fit inside the board's limits (35 MHz to 4.4 GHz); setting the span keeps the center when possible but shifts the range at the limits. Decide whether the span should also keep the center and shrink.

@@ -11,7 +11,7 @@ Hand-over document from the research phase, written when the Pakespec project wa
 - The **sweep protocol was confirmed** on the board, from Linux, in Python (section 4).
 - The apparent "every other sweep is ignored" behavior was caused by a **missing 3-digit delay field** in the command and is solved (section 5).
 - If the board does not answer, **unplugging and replugging the USB cable** fixes it (happened once).
-- Still missing: dBm calibration, measurement of the tracking output, definition of the application architecture.
+- Still missing: an absolute dBm calibration and a measurement of the tracking output level. The application (Rust, egui) exists; see `next-steps.md`.
 - Short-term goal tied to another project: use the 50 MHz tracking output as a reference to calibrate Anritsu power sensors (section 8).
 
 ## 2. Environment and tools used
@@ -46,14 +46,14 @@ Serial: **57600 baud, 8 bits, no parity, 1 stop bit**, DTR and RTS asserted, no 
 **Sweep command:**
 
 ```
-0x8F  'x'  <start: 9 digits, Hz>  <step: 8 digits, Hz>  <points: 4 digits>  <delay: 3 digits>
+0x8F  'x'  <start: 9 digits>  <step: 8 digits>  <points: 4 digits>  <delay: 3 digits>
 ```
 
-Step = (stop − start) / (points − 1). Digits are zero-padded. The board accepts frequencies from 35 MHz up to 4.4 GHz (tested).
+Step = (stop − start) / (points − 1). Digits are zero-padded. Start and step are in command units, which are real frequency divided by 10 (the board multiplies them by 10; see `serial-protocol.md`). The board works from 35 MHz up to about 4.45 GHz.
 
 **Response:** `points × 4` bytes. Each point: channel 1 as 16-bit little-endian (bytes 0 and 1), channel 2 as 16-bit little-endian (bytes 2 and 3). On the single-channel board, channel 2 is equal or nearly equal to channel 1. Raw values measured with nothing connected: **144 to 182** (12-bit STM32 ADC reading the AD8307 detector). Speed: 1001 points from 35 MHz to 4.4 GHz in **1.24 s**; 101 points in 0.13 s.
 
-**Fixed frequency:** `0x8F` + `f` + 9 digits (Hz), for example `f010000000`. No response. `f000000000` stops it. It was **not verified** whether the board really emits the fixed signal at the tracking output; this needs to be measured with another instrument, with an attenuator.
+**Fixed frequency:** `0x8F` + `f` + 9 digits (Hz), for example `f010000000`. No response. `f000000000` stops it. The fixed frequency is also in command units. The board does emit it on RF OUT, also with S1 off (read back through a cable to RF IN); its absolute level was not measured with another instrument (see `serial-protocol.md`).
 
 **Firmware version:** `0x8F` + `v`. Right after reconnecting it returned 1 byte `0x77` (119), consistent with a firmware version. Later reads returned pending ADC data, so `v` is not reliable as a standalone query.
 
@@ -72,7 +72,7 @@ Observed repeatedly in the first experiments (scripts in `experiments/`):
 - Manufacturer specifications: RBW 5 to 120 kHz, more than 800 points per second, logarithmic dynamic range above 50 dB, input up to 10 dBm (the board recommends up to +5 dBm), tracking 120 kHz away from the local oscillator, button S1 turns the tracking on.
 - **P1, 4 pins at the top** (silkscreen "USART") is the STM32 **SWD** port (SWC and SWD). With an ST-Link it would be possible to read the firmware, if there is no readout protection. Check the exact pinout on the board before connecting.
 - External research: noise floor around −76 dBm, no input amplifier, fixed wide RBW, spurious peaks at ±25 and ±75 MHz from a 2.5 GHz signal.
-- RF connectors in use: RF OUT has nothing connected; RF IN has a ~10 cm dipole antenna (as of 2026-10-17; review if this changes).
+- RF connectors: the setup changes between tests; check what is connected before every test (see the README cautions).
 
 ## 7. How to talk to the board
 
