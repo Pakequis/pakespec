@@ -90,8 +90,8 @@ impl Calibration {
         })
     }
 
-    /// The calibration that ships with the application: the scale of the
-    /// manufacturer's program on the reference board (one straight line of
+    /// The calibration that ships with the application: a reference scale taken
+    /// from the reference board (one straight line of
     /// 5.30 raw counts per dB, 0 dB at 455.67 raw, noise floor included),
     /// checked from 35 MHz to 4.4 GHz. It is used when no calibration file
     /// exists; the levels follow that scale and are not absolute.

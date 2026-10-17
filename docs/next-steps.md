@@ -8,7 +8,7 @@ Working on the real board: protocol, board access, simulator, command-line tool 
 
 Known limits, on purpose:
 
-- The built-in dBm calibration copies the scale of the manufacturer's program (5.30 counts/dB), so levels are relative. It disagrees with the function-generator ladder (8.55 counts/dB); the generator amplitude was never checked with an oscilloscope. An absolute check, and an optional measurement with SMA attenuators, are described in `calibration.md`.
+- The built-in dBm calibration follows a reference scale (5.30 counts/dB), so levels are relative. It disagrees with the function-generator ladder (8.55 counts/dB); the generator amplitude was never checked with an oscilloscope. An absolute check, and an optional measurement with SMA attenuators, are described in `calibration.md`.
 - The state of the S1 button cannot be read from the board (`serial-protocol.md`); the application can only infer it from a sweep with the output cabled to the input.
 
 ## Before and after publishing

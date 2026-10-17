@@ -95,7 +95,7 @@ The MA4701A and MA4702A sensors (RF power sensors found at a scrapyard) are cali
 ## 10. Existing alternatives
 
 - **VMA SSA** (Vitor Martins Augusto): free, but with an activation code (about 3 months of trial, permanent for a donation of about US$ 10). Windows only.
-- The vendor's own Windows and Linux programs: no published license or source code, unmaintained.
+- The vendor's own program: only a Windows version is known here; no published license or source code, unmaintained.
 - No open, cross-platform client for the LTDZ is known. That is the gap this project fills.
 
 ## 11. Open items and next steps

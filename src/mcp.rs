@@ -40,13 +40,13 @@ fn tools(allow_generator: bool) -> Vec<Value> {
                 "points": {"type": "integer", "description": "Number of points (default 101)"},
             }},
         }),
-        json!({
-            "name": "measure",
-            "description": "Read the level at one frequency once. The output is stopped afterwards.",
-            "inputSchema": {"type": "object", "properties": {"freq_hz": freq}, "required": ["freq_hz"]},
-        }),
     ];
     if allow_generator {
+        list.push(json!({
+            "name": "measure",
+            "description": "Read the level at one frequency once. Turns the output on at that frequency for the reading, even if the S1 button is off, and stops it afterwards. Ask the user what is connected to RF OUT before using it.",
+            "inputSchema": {"type": "object", "properties": {"freq_hz": freq}, "required": ["freq_hz"]},
+        }));
         list.push(json!({
             "name": "generator",
             "description": "Set the tracking-source frequency and turn the output on at that frequency, even if the S1 button is off. Ask the user what is connected to RF OUT before using it, and call generator_off when done.",
@@ -151,7 +151,7 @@ mod tests {
                 json!({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-03-26"}}),
                 json!({"jsonrpc": "2.0", "method": "notifications/initialized"}),
                 json!({"jsonrpc": "2.0", "id": 2, "method": "tools/list"}),
-                json!({"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "measure", "arguments": {"freq_hz": 940_000_000u64}}}),
+                json!({"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "sweep", "arguments": {"start": 35_000_000u64, "stop": 940_000_000u64}}}),
             ],
         );
         assert_eq!(out.len(), 3, "the notification gets no reply");
@@ -162,10 +162,10 @@ mod tests {
             .iter()
             .map(|t| t["name"].as_str().unwrap())
             .collect();
-        assert_eq!(names, ["list_ports", "status", "sweep", "measure"]);
+        assert_eq!(names, ["list_ports", "status", "sweep"]);
         assert_eq!(out[2]["result"]["isError"], false);
         let text = out[2]["result"]["content"][0]["text"].as_str().unwrap();
-        assert!(serde_json::from_str::<Value>(text).unwrap()["raw"].is_number());
+        assert!(serde_json::from_str::<Value>(text).unwrap()["raw"].is_array());
     }
 
     #[test]
@@ -177,7 +177,7 @@ mod tests {
                 .unwrap()
                 .len()
         };
-        assert_eq!(count(true), count(false) + 2);
+        assert_eq!(count(true), count(false) + 3);
         let call = json!({"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "generator", "arguments": {"freq_hz": 100_000_000u64}}});
         assert_eq!(run(false, &[call])[0]["error"]["code"], -32602);
     }

@@ -5,7 +5,7 @@
 //! Talks JSON-RPC on standard input and output. Without `--calibration`, the
 //! calibration file next to the settings file is used when it exists,
 //! otherwise the standard calibration that ships with the application.
-//! `--no-generator` hides the tools that set the tracking-source frequency.
+//! `--no-generator` hides the tools that put a signal on RF OUT (`measure`, `generator`, `generator_off`).
 
 use std::io::{stdin, stdout};
 use std::process::ExitCode;

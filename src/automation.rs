@@ -181,7 +181,10 @@ impl Session {
     }
 
     /// One detector reading at a fixed frequency; the output is stopped afterwards.
+    /// Needs the generator permission because the output is on during the reading.
     fn measure(&mut self, request: &Value) -> Result<Value, CmdError> {
+        // A reading puts a tone on RF OUT, so it needs the same permission as the generator.
+        self.require_generator()?;
         let freq = required_freq(request)?;
         let board = self.board()?;
         let result = (|| {
@@ -376,7 +379,7 @@ mod tests {
 
     #[test]
     fn measure_reads_the_level_at_the_frequency() {
-        let r = sim(false).execute(&json!({"cmd": "measure", "freq_hz": 940_000_000u64}));
+        let r = sim(true).execute(&json!({"cmd": "measure", "freq_hz": 940_000_000u64}));
         assert_eq!(r["ok"], true);
         assert_eq!(
             r["raw"].as_u64().unwrap(),
@@ -410,6 +413,12 @@ mod tests {
     }
 
     #[test]
+    fn measure_needs_the_generator_permission() {
+        let r = sim(false).execute(&json!({"cmd": "measure", "freq_hz": 940_000_000u64}));
+        assert_eq!(r["error"]["code"], "not_allowed");
+    }
+
+    #[test]
     fn generator_commands_obey_the_permission() {
         let off = sim(false).execute(&json!({"cmd": "generator", "freq_hz": 100_000_000u64}));
         assert_eq!(off["error"]["code"], "not_allowed");
@@ -431,7 +440,7 @@ mod tests {
             min_freq_hz: 35_000_000,
             max_freq_hz: 940_000_000,
         };
-        let mut s = Session::new(Source::Simulator, Some(cal), false);
+        let mut s = Session::new(Source::Simulator, Some(cal), true);
         let r = s.execute(&json!({"cmd": "measure", "freq_hz": 940_000_000u64}));
         assert!(r["dbm"].is_number(), "{r}");
         let r = s.execute(&json!({"cmd": "measure", "freq_hz": 2_000_000_000u64}));

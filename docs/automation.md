@@ -23,9 +23,9 @@ Requests in `--serve` mode: `{"cmd": "sweep", "start": 35000000, "stop": 1000000
 
 ## MCP server (`pakespec-mcp`)
 
-JSON-RPC 2.0 on standard input and output, one message per line, no extra library. Tools: `list_ports`, `status`, `sweep`, `measure`, and `generator`, `generator_off`. Tool results are the same JSON as above, as text; failures set `isError`.
+JSON-RPC 2.0 on standard input and output, one message per line, no extra library. Tools: `list_ports`, `status`, `sweep`, and `measure`, `generator`, `generator_off`. Tool results are the same JSON as above, as text; failures set `isError`.
 
-Options: `--port PATH`, `--simulate`, `--calibration FILE` (default: the calibration file next to the settings file, when it exists), `--no-generator` (hides the two generator tools).
+Options: `--port PATH`, `--simulate`, `--calibration FILE` (default: the calibration file next to the settings file, when it exists), `--no-generator` (hides the three tools that put a signal on RF OUT: `measure`, `generator`, `generator_off`).
 
 Example client configuration:
 
@@ -35,7 +35,7 @@ Example client configuration:
 
 ## What a model can and cannot do
 
-- `sweep` emits a tracking signal only while the S1 button is on. `measure` emits a signal at the measured frequency whatever S1 says (see `serial-protocol.md`, correction of 2026-10-17) and stops the output afterwards.
+- `sweep` emits a tracking signal only while the S1 button is on. `measure` emits a signal at the measured frequency whatever S1 says, so it needs the same permission as `generator` (see `serial-protocol.md`, correction of 2026-10-17) and stops the output afterwards.
 - `generator` turns the output on at a frequency even with S1 off. The tool description tells the model to ask what is connected to RF OUT first and to call `generator_off` when done.
 - It cannot change the calibration, write files or send anything to the board other than sweep, read and frequency commands.
 - Use `--no-generator` when the model should only observe.
