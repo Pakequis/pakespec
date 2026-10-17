@@ -80,7 +80,7 @@ pub fn show(
         painter.text(
             Pos2::new(plot.left() - 6.0, y),
             Align2::RIGHT_CENTER,
-            format!("{}", scale.top - scale.per_div * row as f32),
+            super::draw::format_step(scale.top - scale.per_div * row as f32),
             small.clone(),
             rgb(theme.text_dim),
         );

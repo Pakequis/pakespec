@@ -91,11 +91,15 @@ impl ViewContext<'_> {
     }
 }
 
-fn format_step(step: f32) -> String {
-    if step.fract() == 0.0 {
-        format!("{step:.0}")
+/// A level or step for the axes: up to three decimals, without trailing zeros,
+/// so that `f32` rounding noise such as `-33.600002` never reaches the screen.
+pub(crate) fn format_step(step: f32) -> String {
+    let text = format!("{step:.3}");
+    let text = text.trim_end_matches('0').trim_end_matches('.');
+    if text == "-0" {
+        "0".to_string()
     } else {
-        format!("{step}")
+        text.to_string()
     }
 }
 
@@ -273,6 +277,16 @@ pub fn with_alpha(c: Color32, alpha: u8) -> Color32 {
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn axis_values_show_no_rounding_noise() {
+        assert_eq!(format_step(-33.600002), "-33.6");
+        assert_eq!(format_step(-34.800003), "-34.8");
+        assert_eq!(format_step(-20.0), "-20");
+        assert_eq!(format_step(0.2), "0.2");
+        assert_eq!(format_step(-0.0001), "0");
+        assert_eq!(format_step(2.5), "2.5");
+    }
     use super::*;
     use crate::i18n::Language;
     use crate::protocol::{Sample, SweepParams};
