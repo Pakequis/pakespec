@@ -4,13 +4,13 @@ Free, cross-platform (Linux and Windows) software to control the **LTDZ 35-4400M
 
 Why: the vendor software for this board is Windows-only and unmaintained, and there is no open, cross-platform client for it.
 
-![Pakespec showing a Wi-Fi signal at 2.4 GHz, Instrument style, phosphor theme](docs/images/spectrum-phosphor.png)
+![Pakespec zoomed on 2.0 to 2.6 GHz, Instrument style, dark theme, with three markers](docs/images/spectrum-instrument-dark.png)
 
-A sweep from 35 MHz to 3 GHz with a 10 cm antenna: the Wi-Fi signal near 2.42 GHz stands out of the noise floor (Instrument style, phosphor theme, max hold on).
+A sweep from 2.0 to 2.6 GHz with a 10 cm antenna (Instrument style, dark theme): a Wi-Fi burst near 2.42 GHz stands out of the noise floor, with three markers. Levels are in dBm on the built-in reference scale.
 
-![Pakespec zoomed on the 2.4 GHz band, Instrument style, dark theme with an amber trace, three markers](docs/images/spectrum-dark.png)
+![Pakespec in the Classic style with the phosphor theme and the System menu open](docs/images/spectrum-classic-phosphor.png)
 
-The same screen in the dark theme (amber trace), zoomed on 2.1 to 2.6 GHz: Wi-Fi bursts around 2.42 GHz with three markers.
+The same band in the Classic style with the phosphor theme, with the System menu open (port, style, theme, language and About).
 
 ## Status (2026-10-17)
 
