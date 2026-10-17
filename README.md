@@ -8,6 +8,10 @@ Why: the vendor software for this board is Windows-only and unmaintained, and th
 
 A sweep from 35 MHz to 3 GHz with a 10 cm antenna: the Wi-Fi signal near 2.42 GHz stands out of the noise floor (Instrument style, phosphor theme, max hold on).
 
+![Pakespec zoomed on the 2.4 GHz band, Instrument style, dark theme with an amber trace, three markers](docs/images/spectrum-dark.png)
+
+The same screen in the dark theme (amber trace), zoomed on 2.1 to 2.6 GHz: Wi-Fi bursts around 2.42 GHz with three markers.
+
 ## Status (2026-10-17)
 
 Early stage, working on the real board (Linux). Verification on Windows is still to do.
