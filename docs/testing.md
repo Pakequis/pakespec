@@ -20,6 +20,8 @@ cargo test -- --ignored --test-threads=1
 
 The port comes from `PAKESPEC_PORT` (default `/dev/ttyUSB0`). They check, on the real board: the generator turns on, off and on again (the first frequency command after a stop is ignored, so the client sends it twice); the output stops at the edges of the band; sweeps in segments agree with plain sweeps; the first point of a sweep is right after the output was stopped; a full-range sweep needs 438 points; 40 full-range sweeps in a row never fail; the noise floor with the output off; and the application reading the generator and sweeping the board. Each test leaves the output off.
 
+`src/automation.rs` and `src/mcp.rs` have unit tests against the simulator: request validation and error codes, generator permission, dBm filling, the line protocol, and the MCP handshake, tool list and calls.
+
 ## Pipeline
 
 `.github/workflows/ci.yml` runs formatting, clippy and the first two layers on Ubuntu and Windows, plus `cargo deny check licenses bans advisories` (`deny.toml`). The pipeline has not run yet because the repository has not been published. The same deny check was run locally on 2026-10-17 and passes (licenses, bans, advisories; only duplicate-version warnings). Regenerate the notice file with `python3 tools/gen_third_party_notices.py` whenever dependencies change.

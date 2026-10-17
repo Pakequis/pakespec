@@ -1,8 +1,10 @@
 //! Pakespec: open-source control software for LTDZ 35-4400M spectrum analyzer boards.
 
+pub mod automation;
 pub mod board;
 pub mod calibration;
 pub mod i18n;
+pub mod mcp;
 pub mod panel;
 pub mod ports;
 pub mod protocol;

@@ -1,33 +1,62 @@
-//! Command-line tool: runs one sweep and prints CSV (`freq_hz,ch1,ch2`).
+//! Command-line tool: runs one sweep and prints CSV (`freq_hz,ch1,ch2`), or
+//! JSON for other programs.
 //!
 //! Usage: pakespec-cli [--list-ports | --port PATH | --simulate] [--start HZ] [--stop HZ] [--points N]
-//!                     [--calibration FILE]
+//!                     [--calibration FILE] [--json]
+//!        pakespec-cli --measure HZ | --generator HZ | --generator-off | --status
+//!        pakespec-cli --serve
 //!        pakespec-cli --fit-calibration LADDER.csv --min-freq HZ --max-freq HZ --output FILE
 //!
 //! Without `--port`, the only USB serial converter that matches the board is used.
 //! With `--calibration`, a `dbm` column is added; it is empty where the reading is
 //! outside what the calibration was measured over.
 //! `--fit-calibration` reads `dbm,raw` lines and writes a calibration file.
+//!
+//! `--json`, `--measure`, `--generator`, `--generator-off`, `--status` and
+//! `--list-ports --json` print one JSON document (`{"ok": true, ...}` or
+//! `{"ok": false, "error": {"code", "message"}}`). `--serve` keeps the board open
+//! and answers one JSON request per input line (see `src/automation.rs`).
+//!
+//! Exit codes: 0 success, 1 other failure, 2 bad command line or request,
+//! 3 board not found or cannot be opened, 4 board failed while in use.
 
 use std::process::ExitCode;
 
+use pakespec::automation::{Session, Source, list_ports_json, serve_lines};
 use pakespec::board::{Board, open_serial};
 use pakespec::calibration::{Calibration, parse_ladder};
 use pakespec::ports::{list_ports, suggest};
 use pakespec::protocol::SweepParams;
 use pakespec::sim::SimBoard;
 
+/// A mistake in the command line, reported with exit code 2.
+#[derive(Debug)]
+struct Usage(String);
+
+impl std::fmt::Display for Usage {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.0)
+    }
+}
+
+impl std::error::Error for Usage {}
+
 fn main() -> ExitCode {
     match run() {
-        Ok(()) => ExitCode::SUCCESS,
+        Ok(code) => ExitCode::from(code),
         Err(e) => {
             eprintln!("error: {e}");
-            ExitCode::FAILURE
+            ExitCode::from(if e.is::<Usage>() { 2 } else { 1 })
         }
     }
 }
 
-fn run() -> Result<(), Box<dyn std::error::Error>> {
+fn number<T: std::str::FromStr>(name: &str, text: String) -> Result<T, Usage> {
+    text.parse()
+        .map_err(|_| Usage(format!("{name} needs a number, got {text:?}")))
+}
+
+fn run() -> Result<u8, Box<dyn std::error::Error>> {
     let mut port: Option<String> = None;
     let mut list_only = false;
     let (mut start, mut stop, mut points) = (35_000_000u64, 1_000_000_000u64, 101u16);
@@ -36,31 +65,50 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut fit: Option<String> = None;
     let mut output: Option<String> = None;
     let (mut min_freq, mut max_freq) = (None::<u64>, None::<u64>);
+    let mut json = false;
+    let mut serve = false;
+    // A request for the session layer (--measure, --generator, ...).
+    let mut request: Option<serde_json::Value> = None;
 
     let mut args = std::env::args().skip(1);
     while let Some(arg) = args.next() {
-        let mut value = |name: &str| args.next().ok_or_else(|| format!("{name} needs a value"));
+        let mut value = |name: &str| {
+            args.next()
+                .ok_or_else(|| Usage(format!("{name} needs a value")))
+        };
         match arg.as_str() {
             "--port" => port = Some(value("--port")?),
             "--list-ports" => list_only = true,
-            "--start" => start = value("--start")?.parse()?,
-            "--stop" => stop = value("--stop")?.parse()?,
-            "--points" => points = value("--points")?.parse()?,
+            "--start" => start = number("--start", value("--start")?)?,
+            "--stop" => stop = number("--stop", value("--stop")?)?,
+            "--points" => points = number("--points", value("--points")?)?,
             "--simulate" => simulate = true,
             "--calibration" => calibration = Some(value("--calibration")?),
             "--fit-calibration" => fit = Some(value("--fit-calibration")?),
             "--output" => output = Some(value("--output")?),
-            "--min-freq" => min_freq = Some(value("--min-freq")?.parse()?),
-            "--max-freq" => max_freq = Some(value("--max-freq")?.parse()?),
-            other => return Err(format!("unknown argument {other}").into()),
+            "--min-freq" => min_freq = Some(number("--min-freq", value("--min-freq")?)?),
+            "--max-freq" => max_freq = Some(number("--max-freq", value("--max-freq")?)?),
+            "--json" => json = true,
+            "--serve" => serve = true,
+            "--status" => request = Some(serde_json::json!({"cmd": "status"})),
+            "--generator-off" => request = Some(serde_json::json!({"cmd": "generator_off"})),
+            "--measure" => {
+                let freq_hz: u64 = number("--measure", value("--measure")?)?;
+                request = Some(serde_json::json!({"cmd": "measure", "freq_hz": freq_hz}));
+            }
+            "--generator" => {
+                let freq_hz: u64 = number("--generator", value("--generator")?)?;
+                request = Some(serde_json::json!({"cmd": "generator", "freq_hz": freq_hz}));
+            }
+            other => return Err(Usage(format!("unknown argument {other}")).into()),
         }
     }
 
     if let Some(ladder) = fit {
-        let out = output.ok_or("--fit-calibration needs --output")?;
+        let out = output.ok_or_else(|| Usage("--fit-calibration needs --output".into()))?;
         let (lo, hi) = min_freq
             .zip(max_freq)
-            .ok_or("--fit-calibration needs --min-freq and --max-freq")?;
+            .ok_or_else(|| Usage("--fit-calibration needs --min-freq and --max-freq".into()))?;
         let points = parse_ladder(&std::fs::read_to_string(&ladder)?);
         let cal = Calibration::fit(&points, lo, hi)?;
         cal.save(std::path::Path::new(&out))?;
@@ -68,7 +116,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             "{:.3} counts/dB, {:.1} raw at 0 dBm, raw {:.1} to {:.1}, {} to {} Hz",
             cal.counts_per_db, cal.raw_at_0_dbm, cal.min_raw, cal.max_raw, lo, hi
         );
-        return Ok(());
+        return Ok(0);
     }
 
     let calibration = match calibration {
@@ -78,6 +126,34 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         ),
         None => None,
     };
+
+    if serve || request.is_some() || (json && !list_only) {
+        let source = if simulate {
+            Source::Simulator
+        } else {
+            Source::Port(port)
+        };
+        let mut session = Session::new(source, calibration, true);
+        if serve {
+            serve_lines(
+                &mut session,
+                std::io::stdin().lock(),
+                std::io::stdout().lock(),
+            )?;
+            return Ok(0);
+        }
+        let request = request.unwrap_or_else(
+            || serde_json::json!({"cmd": "sweep", "start": start, "stop": stop, "points": points}),
+        );
+        let (reply, code) = session.execute_with_code(&request);
+        println!("{reply}");
+        return Ok(code);
+    }
+
+    if list_only && json {
+        println!("{}", list_ports_json());
+        return Ok(0);
+    }
 
     if list_only {
         let ports = list_ports();
@@ -98,10 +174,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 p.product.as_deref().unwrap_or("")
             );
         }
-        return Ok(());
+        return Ok(0);
     }
 
-    let params = SweepParams::new(start, stop, points)?;
+    let params = SweepParams::new(start, stop, points).map_err(|e| Usage(e.to_string()))?;
     let sweep = if simulate {
         Board::new(SimBoard::new()).sweep(&params)?
     } else {
@@ -137,5 +213,5 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             None => println!("{freq},{},{}", s.ch1, s.ch2),
         }
     }
-    Ok(())
+    Ok(0)
 }

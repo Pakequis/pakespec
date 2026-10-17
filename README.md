@@ -53,6 +53,8 @@ cargo run --release --bin pakespec-cli -- --port /dev/ttyUSB0 --start 35000000 -
 
 Without `--port`, the only USB serial converter that matches the board is used; `--list-ports` shows what was found. Add `--simulate` to run without a board. The generator needs the S1 button on the board turned on.
 
+For other programs: `--json` and `--measure HZ` print JSON, `--serve` keeps the board open and answers one JSON request per line, and `pakespec-mcp` is an MCP server for language models. See [`docs/automation.md`](docs/automation.md).
+
 Tests: `cargo test` needs no hardware. With the board connected, RF OUT cabled to RF IN and S1 on: `cargo test -- --ignored --test-threads=1`. Run the tests with `cargo test` (no hardware needed). If the board does not answer, unplug and replug the USB cable.
 
 ## License

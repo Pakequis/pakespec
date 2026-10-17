@@ -131,6 +131,7 @@ Pakespec is MIT licensed. The binaries include the following third-party crates.
 - image 0.25.10: MIT OR Apache-2.0 (https://github.com/image-rs/image)
 - indexmap 2.14.2: Apache-2.0 OR MIT (https://github.com/indexmap-rs/indexmap)
 - itertools 0.15.0: MIT OR Apache-2.0 (https://github.com/rust-itertools/itertools)
+- itoa 1.0.18: MIT OR Apache-2.0 (https://github.com/dtolnay/itoa)
 - jni 0.22.4: MIT OR Apache-2.0 (https://github.com/jni-rs/jni-rs)
 - jni-macros 0.22.4: MIT OR Apache-2.0 (https://github.com/jni-rs/jni-rs)
 - jni-sys 0.3.1: MIT OR Apache-2.0 (https://github.com/jni-rs/jni-sys)
@@ -241,6 +242,7 @@ Pakespec is MIT licensed. The binaries include the following third-party crates.
 - serde 1.0.229: MIT OR Apache-2.0 (https://github.com/serde-rs/serde)
 - serde_core 1.0.229: MIT OR Apache-2.0 (https://github.com/serde-rs/serde)
 - serde_derive 1.0.229: MIT OR Apache-2.0 (https://github.com/serde-rs/serde)
+- serde_json 1.0.154: MIT OR Apache-2.0 (https://github.com/serde-rs/json)
 - serde_repr 0.1.21: MIT OR Apache-2.0 (https://github.com/dtolnay/serde-repr)
 - serde_spanned 1.1.2: MIT OR Apache-2.0 (https://github.com/toml-rs/toml)
 - serial2 0.2.38: BSD-2-Clause OR Apache-2.0 (https://github.com/de-vri-es/serial2-rs)
@@ -357,6 +359,7 @@ Pakespec is MIT licensed. The binaries include the following third-party crates.
 - zerocopy 0.8.63: BSD-2-Clause OR Apache-2.0 OR MIT (https://github.com/google/zerocopy)
 - zerocopy-derive 0.8.63: BSD-2-Clause OR Apache-2.0 OR MIT (https://github.com/google/zerocopy)
 - zlib-rs 0.6.8: Zlib (https://github.com/trifectatechfoundation/zlib-rs)
+- zmij 1.0.23: MIT (https://github.com/dtolnay/zmij)
 - zune-core 0.5.3: MIT OR Apache-2.0 OR Zlib (https://github.com/etemesi254/zune-image)
 - zune-jpeg 0.5.15: MIT OR Apache-2.0 OR Zlib (https://github.com/etemesi254/zune-image/tree/dev/crates/zune-jpeg)
 - zvariant 5.15.1: MIT (https://github.com/z-galaxy/zbus/)
@@ -3504,7 +3507,7 @@ Apache License
 
 ---
 
-Used by: async-trait, glifo, libc, litrs, num_enum, num_enum_derive, proc-macro2, quote, rustc-hash, rustversion, semver, serde, serde_core, serde_derive, serde_repr, syn, thiserror, thiserror-impl, unicode-ident
+Used by: async-trait, glifo, itoa, libc, litrs, num_enum, num_enum_derive, proc-macro2, quote, rustc-hash, rustversion, semver, serde, serde_core, serde_derive, serde_json, serde_repr, syn, thiserror, thiserror-impl, unicode-ident
 
 ```text
 Apache License
@@ -8939,7 +8942,7 @@ SOFTWARE.
 
 ---
 
-Used by: adler2, async-channel, async-executor, async-io, async-lock, async-process, async-recursion, async-signal, async-task, async-trait, atomic-waker, blocking, concurrent-queue, endi, event-listener, event-listener-strategy, fastrand, futures-lite, glow, hermit-abi, linux-raw-sys, num_enum, num_enum_derive, once_cell, ordered-stream, parking, pin-project, pin-project-internal, pin-project-lite, piper, polling, portable-atomic, portable-atomic-util, proc-macro-crate, proc-macro2, quote, rustc-hash, rustix, rustversion, semver, serde, serde_core, serde_derive, serde_repr, simd_cesu8, smol_str, syn, thiserror, thiserror-impl, unicode-ident, wasip2, wit-bindgen, x11-dl, zbus-lockstep, zbus-lockstep-macros, zvariant_utils
+Used by: adler2, async-channel, async-executor, async-io, async-lock, async-process, async-recursion, async-signal, async-task, async-trait, atomic-waker, blocking, concurrent-queue, endi, event-listener, event-listener-strategy, fastrand, futures-lite, glow, hermit-abi, itoa, linux-raw-sys, num_enum, num_enum_derive, once_cell, ordered-stream, parking, pin-project, pin-project-internal, pin-project-lite, piper, polling, portable-atomic, portable-atomic-util, proc-macro-crate, proc-macro2, quote, rustc-hash, rustix, rustversion, semver, serde, serde_core, serde_derive, serde_json, serde_repr, simd_cesu8, smol_str, syn, thiserror, thiserror-impl, unicode-ident, wasip2, wit-bindgen, x11-dl, zbus-lockstep, zbus-lockstep-macros, zmij, zvariant_utils
 
 ```text
 Permission is hereby granted, free of charge, to any
