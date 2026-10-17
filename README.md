@@ -4,6 +4,20 @@ Free, cross-platform (Linux and Windows) software to control the **LTDZ 35-4400M
 
 Why: the vendor software for this board is Windows-only and unmaintained, and there is no open, cross-platform client for it.
 
+## About the project
+
+![The LTDZ 35-4400M board: two SMA connectors, a micro-USB port and the tracking source button](docs/images/ltdz-35-4400m-board.jpg)
+
+In 2019 Banggood sent me this board for review. It is a 35 MHz to 4.4 GHz spectrum analyzer with a tracking generator, built around an STM32F103, two ADF4351 synthesizers and an AD8307 detector. I made a video about it and wrote [a post](https://www.pakequis.com.br/2019/08/analisador-de-espector-de-35-mhz-44-ghz.html) (in Portuguese).
+
+Years later the comments on that post were still about the same thing: the software. The one that comes with the board runs only on Windows, its installer is picky about the folder it goes in, and in 2025 someone was still asking where to download it. I use Linux and Windows on the same machine, so I wanted something that works on both and that anyone can read, fix and build.
+
+Pakespec started as a serial port and a lot of experiments, until the board's protocol made sense. It multiplies every frequency by 10, ignores commands while it sweeps and goes mute if it receives one it does not know. Everything I found is in [`docs/serial-protocol.md`](docs/serial-protocol.md), and the rest of the story is in [`docs/full-record.md`](docs/full-record.md).
+
+Want a board to play with? [Here it is on AliExpress](https://s.click.aliexpress.com/e/_c3DrudED) (affiliate link: it costs you nothing extra, and I may earn a small commission).
+
+## Screenshots
+
 ![Pakespec zoomed on 2.0 to 2.6 GHz, Instrument style, dark theme, with three markers](docs/images/spectrum-instrument-dark.png)
 
 A sweep from 2.0 to 2.6 GHz with a 10 cm antenna (Instrument style, dark theme): a Wi-Fi burst near 2.42 GHz stands out of the noise floor, with three markers. Levels are in dBm on the built-in reference scale.
