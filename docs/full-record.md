@@ -6,7 +6,7 @@ Hand-over document from the research phase, written when the Pakespec project wa
 
 - The board is an **LTDZ 35M-4400M** (silkscreen, dated 2019-03-08), a heterodyne spectrum analyzer with a tracking generator, shipped by Banggood in 2019 (post: https://www.pakequis.com.br/2019/08/analisador-de-espector-de-35-mhz-44-ghz.html).
 - Hardware: STM32F103C8T6, CH340G (USB serial), two ADF4351 (local oscillator and tracking), IAM-81008 mixer, AD8307 detector.
-- The vendor software is Windows-only and unmaintained. There is no open, cross-platform client.
+- The software that came with the board (WinNWT4) is Windows-only. Its author (DL4JAL) no longer lists WinNWT4 on his page; the newer NWT4000 v1.11 and NWT2 v1.12 (uploaded in 2021) have Windows, Linux and source releases, but the page says they are not suitable for LTDZ boards. There is no open, cross-platform client for the LTDZ.
 - Communication is serial at **57600 8N1** with commands `0x8F` + ASCII.
 - The **sweep protocol was confirmed** on the board, from Linux, in Python (section 4).
 - The apparent "every other sweep is ignored" behavior was caused by a **missing 3-digit delay field** in the command and is solved (section 5).
@@ -95,7 +95,7 @@ The MA4701A and MA4702A sensors (RF power sensors found at a scrapyard) are cali
 ## 10. Existing alternatives
 
 - **VMA SSA** (Vitor Martins Augusto): free, but with an activation code (about 3 months of trial, permanent for a donation of about US$ 10). Windows only.
-- The vendor's own program: only a Windows version is known here; no published license or source code, unmaintained.
+- The vendor's own program (WinNWT4 4.11.09): only a Windows version is known here, no published source. The author's newer NWT4 releases (GPL v2 source, Linux builds, checked on dl4jal.de on 2026-10-17) are documented as not suitable for LTDZ boards.
 - No open, cross-platform client for the LTDZ is known. That is the gap this project fills.
 
 ## 11. Open items and next steps

@@ -2,15 +2,15 @@
 
 Free, cross-platform (Linux and Windows) software to control the **LTDZ 35-4400M** family of spectrum analyzer and tracking generator boards (35 MHz to 4.4 GHz, STM32F103 + two ADF4351 + AD8307).
 
-Why: the vendor software for this board is Windows-only and unmaintained, and there is no open, cross-platform client for it.
+Why: the software that came with this board (WinNWT4) is Windows-only, the newer NWT releases from its author have Linux builds but state that they are not suitable for LTDZ boards, and there is no open, cross-platform client for it.
 
 ## About the project
 
 ![The LTDZ 35-4400M board: two SMA connectors, a micro-USB port and the tracking source button](docs/images/ltdz-35-4400m-board.jpg)
 
-I have had this board since 2019. It is a 35 MHz to 4.4 GHz spectrum analyzer with a tracking generator, built around an STM32F103, two ADF4351 synthesizers and an AD8307 detector. I made a video about it and wrote [a post](https://www.pakequis.com.br/2019/08/analisador-de-espector-de-35-mhz-44-ghz.html) (in Portuguese). I used the software that was recommended for it, and it is no longer maintained.
+I have had this board since 2019. It is a 35 MHz to 4.4 GHz spectrum analyzer with a tracking generator, built around an STM32F103, two ADF4351 synthesizers and an AD8307 detector. I made a video about it and wrote [a post](https://www.pakequis.com.br/2019/08/analisador-de-espector-de-35-mhz-44-ghz.html) (in Portuguese). I used the software that was recommended for it, WinNWT4, which is no longer offered on its author's page.
 
-Years later the comments on that post were still about the same thing: the software. It runs only on Windows, its installer is picky about the folder it goes in, and in 2025 someone was still asking where to download it. I use Linux and Windows on the same machine, so I wanted something that works on both and that anyone can read, fix and build.
+Years later the comments on that post were still about the same thing: the software. It runs only on Windows, its installer is picky about the folder it goes in, and in 2025 someone was still asking where to download it. Its author (DL4JAL) still publishes Linux builds and source code for the newer NWT4000 and NWT2 programs, but his page says the software is not suitable for LTDZ boards and that their firmware is faulty. I use Linux and Windows on the same machine, so I wanted something that works on both and that anyone can read, fix and build.
 
 Pakespec started as a serial port and a lot of experiments, until the board's protocol made sense. It multiplies every frequency by 10, ignores commands while it sweeps and goes mute if it receives one it does not know. Everything I found is in [`docs/serial-protocol.md`](docs/serial-protocol.md), and the rest of the story is in [`docs/full-record.md`](docs/full-record.md).
 
