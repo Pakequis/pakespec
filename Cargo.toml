@@ -1,0 +1,30 @@
+[package]
+name = "pakespec"
+version = "0.1.0"
+edition = "2024"
+description = "Open-source control software for LTDZ 35-4400M spectrum analyzer boards"
+license = "MIT"
+readme = "README.md"
+
+[features]
+default = ["gui"]
+# The graphical application. Turn off to build and test only the core.
+gui = ["dep:eframe"]
+
+[dependencies]
+eframe = { version = "0.36", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"], optional = true }
+serde = { version = "1.0.229", features = ["derive"] }
+serial2 = "0.2"
+toml = "1.1.8"
+
+[[bin]]
+name = "pakespec"
+path = "src/bin/pakespec.rs"
+required-features = ["gui"]
+
+[[bin]]
+name = "pakespec-cli"
+path = "src/bin/pakespec-cli.rs"
+
+[dev-dependencies]
+egui_kittest = { version = "0.36", features = ["eframe"] }

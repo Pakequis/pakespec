@@ -1,0 +1,30 @@
+# Dependency policy enforced by cargo-deny in CI.
+# Only permissive licenses are accepted (project rule: no GPL, LGPL, AGPL or MPL).
+
+[licenses]
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    "BSL-1.0", # Boost license: permissive
+]
+confidence-threshold = 0.93
+
+# Documented exception: egui's default fonts. The code of the crate is MIT or
+# Apache-2.0; the font files are under OFL-1.1 and the Ubuntu Font License,
+# which only restrict changes to the font files themselves. See docs/decisions.md.
+[[licenses.exceptions]]
+crate = "epaint_default_fonts"
+allow = ["OFL-1.1", "Ubuntu-font-1.0"]
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+
+[advisories]
+version = 2
