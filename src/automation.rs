@@ -195,8 +195,9 @@ impl Session {
         Ok(json!({"freq_hz": freq, "raw": raw, "dbm": self.dbm(f64::from(raw), freq)}))
     }
 
-    /// Sets the tracking-source frequency. The board's S1 button decides whether
-    /// the output is on; the software can neither turn it on nor read it.
+    /// Sets the tracking-source frequency. Measured on 2026-10-17: the output is
+    /// on after this command even with the S1 button off (S1 only gates the
+    /// tracking signal during sweeps).
     fn generator(&mut self, request: &Value) -> Result<Value, CmdError> {
         self.require_generator()?;
         let freq = required_freq(request)?;
@@ -204,7 +205,7 @@ impl Session {
         result.map_err(|e| self.board_error(e))?;
         Ok(json!({
             "freq_hz": freq,
-            "note": "the output is on only if the S1 button on the board is on",
+            "note": "the fixed-frequency output can be on whatever the S1 button says; send generator_off to stop it",
         }))
     }
 

@@ -47,7 +47,9 @@ The board has no fixed-frequency generator separate from the tracking source. RF
 - **After `f000000000` the first `f` with a frequency is ignored**; sending it twice back to back (or 50 ms apart) brings the tone back (3 of 3 times), while one `f`, an `m` before it, an extra digit or a second `f000000000` do not. Changing from one frequency to another needs only one `f`. The client sends a frequency twice.
 - The output is ready within 5 ms of an `f`.
 
-With S1 off nothing arrives at RF IN, whatever is sent. Whether S1 is on cannot be read from the board; the application can only notice a reading at the noise floor.
+**Correction of 2026-10-17:** with S1 off (LED off) a fixed frequency (`f`) still puts a signal on RF OUT: `m` read 486 to 489 at 50 MHz to 1 GHz with RF OUT cabled to RF IN, and 148 to 150 after `f000000000` or with no `f` sent. Sweeps, on the other hand, read only the noise floor (150) with S1 off. So S1 gates the tracking signal during sweeps, not the fixed-frequency output. (Earlier text said nothing arrives with S1 off; that was not true for `f` and `m`.)
+
+Old statement, kept for the record: with S1 off nothing arrives at RF IN, whatever is sent. Whether S1 is on cannot be read from the board; the application can only notice a reading at the noise floor.
 
 **Through response** with a 25 cm BNC cable and SMA to BNC adapters, raw `m` readings: 35 MHz to 500 MHz about 485, 1 GHz 478, 2 GHz 464, 3 GHz 452, 4 GHz 425, 4.3 GHz 320, 4.4 GHz 273, 4.45 GHz 252, then off (148) from 4.45 GHz. Nothing was damaged by connecting the output straight to the input; the highest value read was 492 of a 12-bit range.
 

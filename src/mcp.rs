@@ -49,7 +49,7 @@ fn tools(allow_generator: bool) -> Vec<Value> {
     if allow_generator {
         list.push(json!({
             "name": "generator",
-            "description": "Set the tracking-source frequency. The output is on only if the S1 button on the board is on; this tool cannot switch it. Ask the user what is connected to RF OUT before using it.",
+            "description": "Set the tracking-source frequency and turn the output on at that frequency, even if the S1 button is off. Ask the user what is connected to RF OUT before using it, and call generator_off when done.",
             "inputSchema": {"type": "object", "properties": {"freq_hz": freq}, "required": ["freq_hz"]},
         }));
         list.push(json!({

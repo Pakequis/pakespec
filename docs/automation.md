@@ -35,8 +35,8 @@ Example client configuration:
 
 ## What a model can and cannot do
 
-- It can sweep and read the detector; both leave the tracking source off unless the S1 button on the board is on.
-- It can set the tracking-source frequency, but not switch the output: only the S1 button does, and the software cannot read it. The tool description tells the model to ask what is connected to RF OUT first.
+- `sweep` emits a tracking signal only while the S1 button is on. `measure` emits a signal at the measured frequency whatever S1 says (see `serial-protocol.md`, correction of 2026-10-17) and stops the output afterwards.
+- `generator` turns the output on at a frequency even with S1 off. The tool description tells the model to ask what is connected to RF OUT first and to call `generator_off` when done.
 - It cannot change the calibration, write files or send anything to the board other than sweep, read and frequency commands.
 - Use `--no-generator` when the model should only observe.
 - The board input takes at most +5 dBm; the software cannot check what is connected.
