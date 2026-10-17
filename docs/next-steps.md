@@ -10,6 +10,15 @@ Suggested order. Update this file when something is finished or changes.
 6. **Minimum application features (egui):** continuous sweep, dBm plot, markers, CSV and image export, filter response with the tracking source.
 7. **Before publishing:** check the licenses of any third-party material, remove any third-party file from the repository, and get the owner's approval to publish.
 
+## State at the end of 2026-10-16
+
+Done today: FY6900 control (`calibration.md`), first dBm calibration (35 to 60 MHz), dBm on the screen with an `approximate dBm` badge outside the calibrated range, all hardware tests passing. Next, in this order:
+
+1. Check the FY6900 amplitude with an oscilloscope on 50 ohm; the dBm values depend on it.
+2. Calibrate above 60 MHz (needs another reference source, for example the tracking output with a known attenuator).
+3. Run the license check (`cargo deny`), write the third-party notice file, run the pipeline on GitHub, verify on Windows.
+4. Command-line control and the MCP server (section K of the spec).
+
 ## Behaving like a real spectrum analyzer
 
 Requirement from the owner (2026-10-16): the application has to work like a real bench spectrum analyzer. Gaps found so far, in the suggested order (the first four are software only):
