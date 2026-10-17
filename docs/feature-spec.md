@@ -153,8 +153,8 @@ Requested by the owner on 2026-10-16 for later. Both are thin front ends over th
 |---|---|---|---|---|
 | J1 | Build and tests on Linux and Windows in GitHub Actions | P0 | Partial (written, never run) | The repository on GitHub |
 | J2 | Release binaries attached to version tags | P0 | Planned | J1 |
-| J3 | License check of every dependency in the pipeline | P0 | Done (written, never run) | J1 |
-| J4 | Third-party license texts shipped with the binaries | P0 | Planned | |
+| J3 | License check of every dependency in the pipeline | P0 | Done (passes locally, pipeline never run) | J1 |
+| J4 | Third-party license texts shipped with the binaries | P0 | Partial: `THIRD-PARTY-NOTICES.md` generated; still to attach it to release archives | J2 |
 | J5 | Verified on a real Windows machine with the board | P0 | Planned | A Windows machine |
 | J6 | Installer or portable package for Windows | P1 | Planned | J2 |
 | J7 | Procedure to test on real hardware, kept in the repository | P1 | Done: `tests/hardware.rs` (ignored by default) | |

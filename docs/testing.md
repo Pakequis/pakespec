@@ -22,7 +22,7 @@ The port comes from `PAKESPEC_PORT` (default `/dev/ttyUSB0`). They check, on the
 
 ## Pipeline
 
-`.github/workflows/ci.yml` runs formatting, clippy and the first two layers on Ubuntu and Windows, plus a license check of every dependency (`deny.toml`). It has not run yet because the repository has not been published.
+`.github/workflows/ci.yml` runs formatting, clippy and the first two layers on Ubuntu and Windows, plus `cargo deny check licenses bans advisories` (`deny.toml`). The pipeline has not run yet because the repository has not been published. The same deny check was run locally on 2026-10-17 and passes (licenses, bans, advisories; only duplicate-version warnings). Regenerate the notice file with `python3 tools/gen_third_party_notices.py` whenever dependencies change.
 
 ## Checks done by hand
 
