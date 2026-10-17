@@ -19,7 +19,7 @@ Early stage, working on the real board on Linux and Windows.
 - **Protocol confirmed** on the board (see `docs/serial-protocol.md`): sweep, measure and generator commands, the board multiplies every frequency by 10, steps wrap at 10 MHz.
 - **Rust core** (protocol, board access, simulator) with unit and integration tests, hardware tests that need a board, and a CI workflow.
 - **Graphical application** (egui): four selectable screen styles (Bench, Classic, Instrument, Modern) with ready-made presets, dark, light and phosphor themes, max and min hold traces, averaging, markers with peak search, English and Portuguese, serial port selection with board detection.
-- **Levels in dBm** from 35 to 60 MHz, calibrated with a function generator (`docs/calibration.md`). Elsewhere the same line is applied and the screen says `approximate dBm`. The generator amplitude was not checked with an oscilloscope, so absolute values are approximate. Without a calibration file the screen shows raw detector values.
+- **Levels in dBm** from 35 MHz to 4.4 GHz with a calibration built in (`docs/calibration.md`). It follows the scale of the manufacturer's program on the reference board, so the levels are relative, not absolute. A `calibration.toml` next to `settings.toml` replaces it.
 - **Generator screen** (the board's tracking source): sets a frequency and shows the reading through a cable from RF OUT to RF IN.
 - **For other programs:** a command-line tool with CSV and JSON output and a line-based server mode, and an MCP server for language models (`docs/automation.md`).
 - Hardware research and documented experiments on the board.

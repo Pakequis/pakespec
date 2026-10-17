@@ -61,9 +61,9 @@ impl PakespecApp {
             .map(Settings::load)
             .unwrap_or_default();
         let mut app = Self::with_settings(cc, settings, settings_path);
-        app.calibration = calibration::default_path()
-            .as_deref()
-            .and_then(Calibration::load);
+        app.calibration = Some(Calibration::load_or_standard(
+            calibration::default_path().as_deref(),
+        ));
         app
     }
 

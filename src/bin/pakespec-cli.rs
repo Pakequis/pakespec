@@ -8,7 +8,8 @@
 //!        pakespec-cli --fit-calibration LADDER.csv --min-freq HZ --max-freq HZ --output FILE
 //!
 //! Without `--port`, the only USB serial converter that matches the board is used.
-//! With `--calibration`, a `dbm` column is added; it is empty where the reading is
+//! A `dbm` column is added, from `--calibration` or the calibration file next to the
+//! settings file, otherwise the standard calibration; it is empty where the reading is
 //! outside what the calibration was measured over.
 //! `--fit-calibration` reads `dbm,raw` lines and writes a calibration file.
 //!
@@ -124,7 +125,9 @@ fn run() -> Result<u8, Box<dyn std::error::Error>> {
             Calibration::load(std::path::Path::new(&path))
                 .ok_or("cannot read the calibration file")?,
         ),
-        None => None,
+        None => Some(Calibration::load_or_standard(
+            pakespec::calibration::default_path().as_deref(),
+        )),
     };
 
     if serve || request.is_some() || (json && !list_only) {

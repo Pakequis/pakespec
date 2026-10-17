@@ -3,7 +3,8 @@
 //! Usage: pakespec-mcp [--port PATH | --simulate] [--calibration FILE] [--no-generator]
 //!
 //! Talks JSON-RPC on standard input and output. Without `--calibration`, the
-//! calibration file next to the settings file is used when it exists.
+//! calibration file next to the settings file is used when it exists,
+//! otherwise the standard calibration that ships with the application.
 //! `--no-generator` hides the tools that set the tracking-source frequency.
 
 use std::io::{stdin, stdout};
@@ -32,7 +33,7 @@ fn main() -> ExitCode {
             other => return usage(&format!("unknown argument {other}")),
         }
     }
-    let calibration = calibration_path.and_then(|p| Calibration::load(&p));
+    let calibration = Some(Calibration::load_or_standard(calibration_path.as_deref()));
     let mut session = Session::new(source, calibration, allow_generator);
     match pakespec::mcp::serve(&mut session, stdin().lock(), stdout().lock()) {
         Ok(()) => ExitCode::SUCCESS,

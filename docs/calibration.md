@@ -48,6 +48,27 @@ Every 1 MHz, 30 readings, at 50 mVpp and 200 mVpp: the readings stay within 253.
 
 If `calibration.toml` exists next to `settings.toml` (Linux: `~/.config/pakespec/`), the screen shows dBm: the reference level and scale per division are in dBm and dB, and the marker readout is in dBm. The line measured at 50 MHz is applied to every frequency (decision of 2026-10-17): when the trace goes outside 35 to 60 MHz the header adds `approximate dBm`, and a marker value outside the measured raw range (for example the noise floor) or frequencies gets a `~`. A manual scale saved in raw units is not converted when a calibration appears; switch to auto scale once. Create the file with `pakespec-cli --fit-calibration`.
 
+## Matching the original software's scale (2026-10-17)
+
+Reference: two screenshots of the manufacturer's Windows program on the same board, with RF OUT cabled to RF IN (tracking on, then off). The through trace runs from about +6 dB at 35 MHz to about -21 dB near 3.45 GHz, and the floor with the tracking off is about -58.8 dB.
+
+The red trace was digitised from the screenshot and paired, by frequency, with a 1000-point sweep taken with this application in the same state. One straight line fits the whole range, including the noise floor: `dB = (raw - 455.7) / 5.30` (rms residual 0.7 dB). The floor reading of about 148 raw gives -58 dB, as in the screenshot.
+
+This scale (5.30 counts/dB) differs from the FY6900 ladder above (8.55 counts/dB between about -33 and -2 dBm), so one of the two references has an error in level, probably the generator amplitude, which was never checked with an oscilloscope. For a display that looks like the original, use:
+
+```toml
+counts_per_db = 5.30
+raw_at_0_dbm = 455.67
+min_raw = 148.0
+max_raw = 500.0
+min_freq_hz = 35000000
+max_freq_hz = 4400000000
+```
+
+These dB values follow the original program's scale; they are not an absolute level.
+
+This line is built into the application (`Calibration::standard()` in `src/calibration.rs`) and is used whenever no valid `calibration.toml` exists, by the application, `pakespec-cli` and `pakespec-mcp`. A file next to `settings.toml` takes priority.
+
 ## Optional: levels above 60 MHz
 
 The FY6900 stops at 60 MHz, so above it the same line is applied and marked `approximate dBm`. A way to measure the response there without another generator: SMA attenuators of known value (for example 10, 16, 20, 26, 30 and 36 dB, built from fixed parts) between RF OUT and RF IN with S1 on, one scan per value with `experiments/attenuator_scan.py DB`, then `experiments/attenuator_fit.py`. It prints the slope in counts per dB and the level change with frequency per band. This gives the flatness of the whole chain (cable and adapters included), not an absolute level, which stays tied to the FY6900 at 35 to 60 MHz. Check that two 10 dB parts in series agree with one 20 dB part to spot a bad attenuator. Not done yet: no attenuators were available.

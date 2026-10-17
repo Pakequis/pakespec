@@ -90,6 +90,28 @@ impl Calibration {
         })
     }
 
+    /// The calibration that ships with the application: the scale of the
+    /// manufacturer's program on the reference board (one straight line of
+    /// 5.30 raw counts per dB, 0 dB at 455.67 raw, noise floor included),
+    /// checked from 35 MHz to 4.4 GHz. It is used when no calibration file
+    /// exists; the levels follow that scale and are not absolute.
+    pub fn standard() -> Calibration {
+        Calibration {
+            counts_per_db: 5.30,
+            raw_at_0_dbm: 455.67,
+            min_raw: 148.0,
+            max_raw: 500.0,
+            min_freq_hz: 35_000_000,
+            max_freq_hz: 4_400_000_000,
+        }
+    }
+
+    /// The calibration file at `path` when it is valid, otherwise [`Calibration::standard`].
+    pub fn load_or_standard(path: Option<&Path>) -> Calibration {
+        path.and_then(Calibration::load)
+            .unwrap_or_else(Calibration::standard)
+    }
+
     pub fn raw_to_dbm(&self, raw: f64) -> f64 {
         (raw - self.raw_at_0_dbm) / self.counts_per_db
     }
@@ -179,6 +201,30 @@ mod tests {
         for &(dbm, raw) in &LADDER[4..] {
             assert!((c.raw_to_dbm(raw) - dbm).abs() < 0.5, "{dbm} dBm");
         }
+    }
+
+    #[test]
+    fn standard_calibration_matches_the_reference_scale() {
+        let c = Calibration::standard();
+        assert!((c.raw_to_dbm(486.0) - 5.7).abs() < 0.1); // through response
+        assert!((c.raw_to_dbm(148.0) + 58.0).abs() < 0.5); // noise floor
+        assert!(c.is_trusted(400.0, 3_000_000_000));
+    }
+
+    #[test]
+    fn missing_or_damaged_file_falls_back_to_the_standard() {
+        let dir = temp_file("fallback");
+        std::fs::create_dir_all(&dir).unwrap();
+        let bad = dir.join("calibration.toml");
+        std::fs::write(&bad, "not a calibration").unwrap();
+        assert_eq!(
+            Calibration::load_or_standard(Some(&bad)),
+            Calibration::standard()
+        );
+        assert_eq!(Calibration::load_or_standard(None), Calibration::standard());
+        let own = Calibration::fit(LADDER, 35_000_000, 60_000_000).unwrap();
+        own.save(&bad).unwrap();
+        assert_eq!(Calibration::load_or_standard(Some(&bad)), own);
     }
 
     #[test]
