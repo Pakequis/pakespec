@@ -158,6 +158,8 @@ fn run(source: Source, commands: Receiver<Command>, events: Sender<Event>, wake:
                 mode = Mode::Idle;
                 send(Event::Stopped);
             }
+            // Opening the board has side effects, so it stays out of a match guard.
+            #[allow(clippy::collapsible_match)]
             Some(Command::Start(params)) => {
                 if ensure_open(&mut board, &source, &send) {
                     mode = Mode::Sweeping(params);

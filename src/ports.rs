@@ -53,8 +53,7 @@ fn list_platform_ports() -> Vec<PortInfo> {
 
 #[cfg(not(target_os = "linux"))]
 fn list_platform_ports() -> Vec<PortInfo> {
-    // Without USB identity: the port still can be chosen by hand.
-    serial2::SerialPort::available_ports()
+    let mut ports: Vec<PortInfo> = serial2::SerialPort::available_ports()
         .unwrap_or_default()
         .into_iter()
         .map(|p: std::path::PathBuf| PortInfo {
@@ -63,7 +62,81 @@ fn list_platform_ports() -> Vec<PortInfo> {
             pid: None,
             product: None,
         })
-        .collect()
+        .collect();
+    // Without a USB identity the port can still be chosen by hand.
+    #[cfg(windows)]
+    for port in &mut ports {
+        if let Some((vid, pid, product)) = windows_usb_identity(&port.path) {
+            port.vid = Some(vid);
+            port.pid = Some(pid);
+            port.product = product;
+        }
+    }
+    ports
+}
+
+/// Finds the USB identity of a COM port in the registry: every USB device
+/// has a key `Enum\USB\VID_xxxx&PID_xxxx\<instance>` whose `Device Parameters`
+/// holds the `PortName` Windows assigned to it. Keys of devices that are no
+/// longer plugged in stay in the registry, but `port` only comes from the list
+/// of ports that exist now, so a stale key can only describe a port by name.
+#[cfg(windows)]
+fn windows_usb_identity(port: &str) -> Option<(u16, u16, Option<String>)> {
+    use winreg::RegKey;
+    use winreg::enums::HKEY_LOCAL_MACHINE;
+
+    let usb = RegKey::predef(HKEY_LOCAL_MACHINE)
+        .open_subkey(r"SYSTEM\CurrentControlSet\Enum\USB")
+        .ok()?;
+    for device in usb.enum_keys().flatten() {
+        let Some((vid, pid)) = parse_vid_pid(&device) else {
+            continue;
+        };
+        let Ok(device_key) = usb.open_subkey(&device) else {
+            continue;
+        };
+        for instance in device_key.enum_keys().flatten() {
+            let Ok(instance_key) = device_key.open_subkey(&instance) else {
+                continue;
+            };
+            let name: Option<String> = instance_key
+                .open_subkey("Device Parameters")
+                .and_then(|k| k.get_value("PortName"))
+                .ok();
+            if name.as_deref() != Some(port) {
+                continue;
+            }
+            let product = instance_key
+                .get_value::<String, _>("FriendlyName")
+                .ok()
+                .map(|s| strip_port_suffix(&s));
+            return Some((vid, pid, product));
+        }
+    }
+    None
+}
+
+/// Reads the ids out of a Windows USB device key name such as
+/// `VID_1A86&PID_7523` (composite interfaces add `&MI_00`).
+#[cfg_attr(not(windows), allow(dead_code))]
+fn parse_vid_pid(key: &str) -> Option<(u16, u16)> {
+    let hex = |part: &str, prefix: &str| {
+        part.strip_prefix(prefix)
+            .and_then(|h| u16::from_str_radix(h, 16).ok())
+    };
+    let mut parts = key.split('&');
+    let vid = hex(parts.next()?, "VID_")?;
+    let pid = hex(parts.next()?, "PID_")?;
+    Some((vid, pid))
+}
+
+/// Turns the friendly name `USB-SERIAL CH340 (COM5)` into `USB-SERIAL CH340`.
+#[cfg_attr(not(windows), allow(dead_code))]
+fn strip_port_suffix(friendly: &str) -> String {
+    match friendly.rfind(" (COM") {
+        Some(i) => friendly[..i].to_string(),
+        None => friendly.to_string(),
+    }
 }
 
 /// Reads USB serial adapters from sysfs. `sys_root` and `dev_root` are
@@ -176,5 +249,30 @@ mod tests {
     #[test]
     fn missing_sysfs_gives_empty_list() {
         assert!(list_linux_ports(Path::new("/nonexistent"), Path::new("/dev")).is_empty());
+    }
+}
+
+#[cfg(test)]
+mod name_tests {
+    use super::*;
+
+    #[test]
+    fn reads_ids_from_a_usb_key_name() {
+        assert_eq!(parse_vid_pid("VID_1A86&PID_7523"), Some((0x1A86, 0x7523)));
+        assert_eq!(
+            parse_vid_pid("VID_1A86&PID_55D3&MI_00"),
+            Some((0x1A86, 0x55D3))
+        );
+        assert_eq!(parse_vid_pid("ROOT_HUB30"), None);
+        assert_eq!(parse_vid_pid("VID_ZZZZ&PID_7523"), None);
+    }
+
+    #[test]
+    fn friendly_name_loses_the_port_suffix() {
+        assert_eq!(
+            strip_port_suffix("USB-SERIAL CH340 (COM5)"),
+            "USB-SERIAL CH340"
+        );
+        assert_eq!(strip_port_suffix("Plain name"), "Plain name");
     }
 }

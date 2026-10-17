@@ -1,5 +1,8 @@
 //! Graphical application.
 
+// Release builds on Windows are GUI programs: without this a console window opens beside the application.
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use eframe::egui;
 use pakespec::ui::PakespecApp;
 

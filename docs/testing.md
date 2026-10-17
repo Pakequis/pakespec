@@ -30,6 +30,19 @@ The port comes from `PAKESPEC_PORT` (default `/dev/ttyUSB0`). They check, on the
 
 `.github/workflows/release.yml` runs when a tag such as `v0.1.0` is pushed: it builds `pakespec`, `pakespec-cli` and `pakespec-mcp` on Ubuntu and Windows, packs each platform into an archive with `LICENSE`, `THIRD-PARTY-NOTICES.md` and `README.md`, and creates a GitHub release with both archives. Never run yet; the Linux packaging steps were checked by hand.
 
+## Windows check (2026-10-17)
+
+Windows 10, Rust 1.95, build output outside the project folder (`CARGO_TARGET_DIR`). Board on `COM5` (CH340), a cable from RF OUT to RF IN, S1 on, nothing else on the SMA connectors.
+
+- `cargo fmt --check`, `cargo clippy --all-targets -- -D warnings` and `cargo test` pass; the hardware tests are skipped by default. Clippy 1.95 flagged one `collapsible_match` in `src/worker.rs`; the arm now carries an `allow` with the reason.
+- `cargo build --release --bins` builds `pakespec.exe`, `pakespec-cli.exe` and `pakespec-mcp.exe`.
+- `pakespec-mcp --simulate` answers `tools/list` with the six tools.
+- Port detection: the non-Linux code used to return ports without a USB identity, so no board was ever suggested on Windows. It now reads `HKLM\SYSTEM\CurrentControlSet\Enum\USB` (`VID_xxxx&PID_xxxx` keys, `Device Parameters\PortName`) and matches it against the ports that exist now. Result: `COM5` has `board_candidate` and `suggested`; the other CH34x device (`COM6`, `1a86:55d3`) is listed but not suggested. The key-name parsing has unit tests that run on every platform; the registry read itself was checked on this machine only.
+- Real board through `pakespec-cli`: a 101-point sweep from 35 MHz to 1 GHz read 476 to 492 raw, and a measurement at 100 MHz read 487.
+- `cargo test -- --ignored --test-threads=1` with `PAKESPEC_PORT=COM5`: all 9 hardware tests pass (7 in `tests/hardware.rs`, 2 in `tests/ui.rs`). The output was turned off afterwards.
+- Application: `pakespec.exe` opens, shows the front panel and responds. Release builds used to open a console window beside it; `src/bin/pakespec.rs` now uses the Windows GUI subsystem. Not checked: pressing Sweep with the board, switching themes and languages, and where the files are written. The settings path comes from `src/settings.rs` (`%APPDATA%\pakespec\settings.toml`); the file does not exist until a setting is changed.
+- `cargo deny` is not installed on this machine, so the license check was not run. `winreg` (new, Windows only) is MIT; its dependencies are `cfg-if` and `windows-sys`.
+
 ## Checks done by hand
 
 Reception with an antenna (see `serial-protocol.md`) and looking at the screens in the application. There is no screenshot test.

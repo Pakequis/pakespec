@@ -341,6 +341,7 @@ Pakespec is MIT licensed. The binaries include the following third-party crates.
 - windows_x86_64_msvc 0.52.6: MIT OR Apache-2.0 (https://github.com/microsoft/windows-rs)
 - winit 0.30.13: Apache-2.0 (https://github.com/rust-windowing/winit)
 - winnow 1.0.4: MIT (https://github.com/winnow-rs/winnow)
+- winreg 0.56.0: MIT (https://github.com/gentoo90/winreg-rs)
 - wit-bindgen 0.57.1: Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT (https://github.com/bytecodealliance/wit-bindgen)
 - x11-dl 2.21.0: MIT (https://github.com/AltF02/x11-rs.git)
 - x11rb 0.13.2: MIT OR Apache-2.0 (https://github.com/psychon/x11rb)
@@ -5867,6 +5868,32 @@ Used by: wayland-backend, wayland-client, wayland-cursor, wayland-protocols, way
 
 ```text
 Copyright (c) 2015 Elinor Berger
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
+
+---
+
+Used by: winreg
+
+```text
+Copyright (c) 2015 Igor Shaula
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

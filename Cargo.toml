@@ -18,6 +18,10 @@ serde_json = "1"
 serial2 = "0.2"
 toml = "1.1.8"
 
+[target.'cfg(windows)'.dependencies]
+# Reads the USB identity of COM ports from the registry.
+winreg = "0.56"
+
 [[bin]]
 name = "pakespec"
 path = "src/bin/pakespec.rs"
