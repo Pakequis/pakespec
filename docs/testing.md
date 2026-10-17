@@ -26,6 +26,10 @@ The port comes from `PAKESPEC_PORT` (default `/dev/ttyUSB0`). They check, on the
 
 `.github/workflows/ci.yml` runs formatting, clippy and the first two layers on Ubuntu and Windows, plus `cargo deny check licenses bans advisories` (`deny.toml`). The pipeline has not run yet because the repository has not been published. The same deny check was run locally on 2026-10-17 and passes (licenses, bans, advisories; only duplicate-version warnings). Regenerate the notice file with `python3 tools/gen_third_party_notices.py` whenever dependencies change.
 
+## Releases
+
+`.github/workflows/release.yml` runs when a tag such as `v0.1.0` is pushed: it builds `pakespec`, `pakespec-cli` and `pakespec-mcp` on Ubuntu and Windows, packs each platform into an archive with `LICENSE`, `THIRD-PARTY-NOTICES.md` and `README.md`, and creates a GitHub release with both archives. Never run yet; the Linux packaging steps were checked by hand.
+
 ## Checks done by hand
 
 Reception with an antenna (see `serial-protocol.md`) and looking at the screens in the application. There is no screenshot test.

@@ -1,0 +1,75 @@
+name: Release
+
+# Runs when a version tag such as v0.1.0 is pushed. Builds the three programs on
+# Linux and Windows and attaches one archive per platform to a GitHub release,
+# each with the license, the third-party notices and the README.
+
+on:
+  push:
+    tags: ["v*"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-x86_64
+            exe: ""
+          - os: windows-latest
+            platform: windows-x86_64
+            exe: ".exe"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build
+        run: cargo build --release --bins --locked
+      - name: Package
+        shell: bash
+        run: |
+          name="pakespec-${GITHUB_REF_NAME}-${{ matrix.platform }}"
+          mkdir "$name"
+          for bin in pakespec pakespec-cli pakespec-mcp; do
+            cp "target/release/${bin}${{ matrix.exe }}" "$name/"
+          done
+          cp LICENSE THIRD-PARTY-NOTICES.md README.md "$name/"
+          if [ "${{ matrix.exe }}" = ".exe" ]; then
+            7z a "$name.zip" "$name"
+            echo "ARCHIVE=$name.zip" >> "$GITHUB_ENV"
+          else
+            tar czf "$name.tar.gz" "$name"
+            echo "ARCHIVE=$name.tar.gz" >> "$GITHUB_ENV"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: ${{ env.ARCHIVE }}
+          if-no-files-found: error
+
+  publish:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes

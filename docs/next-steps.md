@@ -18,7 +18,7 @@ Known limits, on purpose:
 3. **Run the pipeline on GitHub** (`.github/workflows/ci.yml`): never run yet. Read the result and fix what fails on Ubuntu or Windows.
 4. **Verify on Windows**: the application, port detection through the registry, and a sweep with a real board.
 5. **Screenshots** of the application for the README.
-6. **Release binaries** for Linux and Windows attached to version tags, with `THIRD-PARTY-NOTICES.md` in each archive (feature list J2 and J4).
+6. **Release binaries** for Linux and Windows: the workflow `.github/workflows/release.yml` is written (runs on a `v*` tag, packs the licenses into each archive); run it with the first tag and check the archives.
 
 ## Behaving like a real spectrum analyzer
 
