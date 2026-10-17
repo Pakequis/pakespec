@@ -33,6 +33,8 @@ Early stage, working on the real board on Linux and Windows.
 5. `docs/decisions.md`: choices already made (name, license, platforms) and what is still open.
 6. `docs/feature-spec.md`: the feature list, what is done, what is blocked, and the decisions needed.
 7. `docs/testing.md`: how the tests are organized and how to run them.
+8. `docs/automation.md`: the command line and the MCP server in detail.
+9. `docs/calibration.md`: how raw readings become dBm.
 
 ## Folders
 
@@ -51,17 +53,42 @@ Graphical application (pick the port, press Sweep; the simulator entry works wit
 cargo run --release --bin pakespec
 ```
 
-Command line:
+### Command line
 
-With the board on USB (CH340, `/dev/ttyUSB0` on Linux), a sweep printed as CSV (`freq_hz,ch1,ch2`, raw values):
+With the board on USB (CH340, `/dev/ttyUSB0` on Linux), a sweep printed as CSV (`freq_hz,ch1,ch2,dbm`: raw values and dBm on the built-in scale):
 
 ```
 cargo run --release --bin pakespec-cli -- --port /dev/ttyUSB0 --start 35000000 --stop 1000000000 --points 101
 ```
 
-Without `--port`, the only USB serial converter that matches the board is used; `--list-ports` shows what was found. Add `--simulate` to run without a board. Sweeps with the tracking source need the S1 button on the board turned on; a fixed-frequency output (`--generator`, `--measure`) works without it.
+More examples (add `--simulate` to try them without a board; without `--port` the only matching board is used):
 
-For other programs: `--json` and `--measure HZ` print JSON, `--serve` keeps the board open and answers one JSON request per line, and `pakespec-mcp` is an MCP server for language models. See [`docs/automation.md`](docs/automation.md).
+```
+pakespec-cli --list-ports --json                         # serial ports; the likely board is marked
+pakespec-cli --json --start 2000000000 --stop 2600000000 --points 300   # one sweep as JSON, with the peak
+pakespec-cli --measure 100000000                         # one reading at 100 MHz (turns the output on briefly)
+pakespec-cli --generator 50000000                        # tracking source on at 50 MHz
+pakespec-cli --generator-off                             # and off again
+echo '{"cmd":"sweep","start":35000000,"stop":1000000000,"points":101}' | pakespec-cli --serve
+```
+
+`--serve` keeps the board open and answers one JSON request per input line. Sweeps with the tracking source need the S1 button on the board turned on; a fixed-frequency output (`--generator`, `--measure`) works without it, so ask what is on RF OUT before using them.
+
+### MCP server (for language models)
+
+`pakespec-mcp` speaks JSON-RPC over standard input and output. Add it to an MCP client (for example in its `mcpServers` configuration):
+
+```json
+{"mcpServers": {"pakespec": {"command": "pakespec-mcp", "args": ["--port", "/dev/ttyUSB0", "--no-generator"]}}}
+```
+
+Tools: `list_ports`, `status`, `sweep`, and `measure`, `generator`, `generator_off`. `--no-generator` hides the last three, the ones that put a signal on RF OUT, so the model can only observe. Try it without a client:
+
+```
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | pakespec-mcp --simulate
+```
+
+Details, request formats and exit codes: [`docs/automation.md`](docs/automation.md).
 
 Tests: `cargo test` needs no hardware. With the board connected, RF OUT cabled to RF IN and S1 on: `cargo test -- --ignored --test-threads=1`. If the board does not answer, unplug and replug the USB cable. Do not send unknown commands to the board: it stays silent until it is replugged.
 
