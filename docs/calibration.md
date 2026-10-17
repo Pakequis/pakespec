@@ -48,6 +48,10 @@ Every 1 MHz, 30 readings, at 50 mVpp and 200 mVpp: the readings stay within 253.
 
 If `calibration.toml` exists next to `settings.toml` (Linux: `~/.config/pakespec/`), the screen shows dBm: the reference level and scale per division are in dBm and dB, and the marker readout is in dBm. The line measured at 50 MHz is applied to every frequency (decision of 2026-10-16): when the trace goes outside 35 to 60 MHz the header adds `approximate dBm`, and a marker value outside the measured raw range (for example the noise floor) or frequencies gets a `~`. A manual scale saved in raw units is not converted when a calibration appears; switch to auto scale once. Create the file with `pakespec-cli --fit-calibration`.
 
+## Planned: levels above 60 MHz
+
+The FY6900 stops at 60 MHz. Plan (2026-10-17): SMA attenuators of known value between RF OUT and RF IN with the tracking source on, scans with `experiments/attenuator_scan.py` and a per-band fit with `experiments/attenuator_fit.py`. This gives the slope in counts per dB and the flatness of the whole chain above 60 MHz, not an absolute level; the absolute level stays tied to the FY6900 at 35 to 60 MHz. Steps in `next-steps.md`.
+
 ## Open
 
 - Absolute accuracy: needs a check of the FY6900 amplitude with an oscilloscope on 50 ohm.

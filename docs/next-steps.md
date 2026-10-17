@@ -10,7 +10,23 @@ Suggested order. Update this file when something is finished or changes.
 6. **Minimum application features (egui):** continuous sweep, dBm plot, markers, CSV and image export, filter response with the tracking source.
 7. **Before publishing:** check the licenses of any third-party material, remove any third-party file from the repository, and get the owner's approval to publish.
 
-## State at the end of 2026-10-16
+## State at the end of 2026-10-17
+
+Done on 2026-10-17: license check (`cargo deny`) and third-party notices (`tools/gen_third_party_notices.py`); command-line JSON output, `--serve` mode and the MCP server (`automation.md`), tried on the real board and with Claude Code as the client; findings about S1 and unknown commands in `serial-protocol.md`. All 9 hardware tests pass (S1 must be on for them).
+
+Waiting for: SMA attenuators ordered by the owner (about 6, 10, 10, 20 dB, maybe 3 dB, plus a 15 cm SMA cable; arrival in two to three weeks). No oscilloscope, NanoVNA, RF generator or power sensor available.
+
+Next, in this order:
+
+1. **Calibration above 60 MHz with the attenuators** (approximate, enough for a coherent spectrum). Ask the owner to switch S1 on and to build each attenuation between RF OUT and RF IN (all through-signal levels stay at or below the tracking output, which was connected straight to the input before without damage: raw 486 is about +5 dBm, so use 10 dB or more). For each of 10, 16 (10+6), 20, 26 (20+6), 30 (20+10), 36 (20+10+6) dB run `python3 experiments/attenuator_scan.py DB` (add `--simulate` for a dry run), then `python3 experiments/attenuator_fit.py`. It prints the slope in counts per dB per band (the reference is 8.55 at 50 MHz) and the level change with frequency. Check that 10+10 agrees with 20 dB to spot a bad attenuator.
+2. **Use the result in the application.** If the slope is about the same everywhere, add a per-frequency level correction (flatness table) to the calibration file and apply it in `calibration.rs`, with the `approximate dBm` badge kept where the correction is not measured. The flatness found this way includes the cable and adapters.
+3. **Interface text.** The generator screen still says the output needs S1; fixed-frequency output works with S1 off (see `serial-protocol.md`). Change the text in `src/ui/generator.rs` and `locales/*.toml`, after the owner confirms.
+4. **Pipeline and Windows.** Run the pipeline on GitHub (needs the repository published, owner decision), verify on Windows, attach `THIRD-PARTY-NOTICES.md` to release archives.
+5. **Check the FY6900 amplitude** with an oscilloscope on 50 ohm if one becomes available; the absolute dBm values depend on it.
+
+Hardware reminders: the FY6900 is `/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0`, both outputs off (it may be powered on with 5 Vpp and outputs on: read `RMN`, `RFN` and `RMA`, switch the outputs off and set the amplitude before connecting anything). Never send unknown commands to the board (it goes silent until the USB cable is replugged).
+
+## Earlier state: end of at the end of 2026-10-16
 
 Done today: FY6900 control (`calibration.md`), first dBm calibration (35 to 60 MHz), dBm on the screen with an `approximate dBm` badge outside the calibrated range, all hardware tests passing. Next, in this order:
 
