@@ -28,6 +28,10 @@ Every command starts with the byte `0x8F`, followed by ASCII text.
 | Version | `v` | 1 byte, `0x77` (119), read as firmware 1.19 |
 | Status | `s` | 4 bytes `0a 00 00 00` (little-endian 10), read as hardware version 10 |
 
+**The S1 state cannot be read.** Checked on 2026-10-17: `s` returns `0a 00 00 00` and `v` returns `77` identically with S1 on and off, before any `f`, with a frequency set and after `f000000000`. The only way to tell is to infer it from a sweep with RF OUT cabled to RF IN (about 489 with the tracking source on, about 150 with it off); this cannot tell S1 off from a loose cable.
+
+**Do not send unknown commands.** `0x8F` followed by `a` and, on a second try, by `b` each left the board silent: no answer to `s`, `v` or `m`, even when resent, until the USB cable was unplugged and plugged in again. Nothing else was tried after that, so no other letter is known to be safe or useful.
+
 ## Sweep
 
 - **Response:** `points × 4` bytes, streamed while the board measures. Per point, channel 1 as a 16-bit little-endian value and channel 2 as a 16-bit little-endian value; on this single-channel board they are equal.
