@@ -180,7 +180,9 @@ pub fn decode_sweep(bytes: &[u8], params: &SweepParams) -> Result<Vec<Sample>, P
 /// Decodes every complete 4-byte point in `bytes`; a trailing partial point is ignored.
 pub fn decode_samples(bytes: &[u8]) -> Vec<Sample> {
     bytes
-        .chunks_exact(BYTES_PER_POINT)
+        .as_chunks::<BYTES_PER_POINT>()
+        .0
+        .iter()
         .map(|c| Sample {
             ch1: u16::from_le_bytes([c[0], c[1]]),
             ch2: u16::from_le_bytes([c[2], c[3]]),
