@@ -151,10 +151,10 @@ Both are thin front ends over the same core library that the graphical applicati
 
 | Id | Feature | Pri | Status | Depends on |
 |---|---|---|---|---|
-| J1 | Build and tests on Linux and Windows in GitHub Actions | P0 | Partial (written, never run) | The repository on GitHub |
-| J2 | Release binaries attached to version tags | P0 | Written (`.github/workflows/release.yml`, never run; the packaging steps were checked locally for Linux) | J1 |
-| J3 | License check of every dependency in the pipeline | P0 | Done (passes locally, pipeline never run) | J1 |
-| J4 | Third-party license texts shipped with the binaries | P0 | Done in the release archives (`THIRD-PARTY-NOTICES.md`, `LICENSE`, `README.md`); never run on GitHub | J2 |
+| J1 | Build and tests on Linux and Windows in GitHub Actions | P0 | Done (passes on Ubuntu and Windows, 2026-10-17) | |
+| J2 | Release binaries attached to version tags | P0 | Done (`.github/workflows/release.yml`; `v0.1.0` published with a Linux and a Windows archive) | J1 |
+| J3 | License check of every dependency in the pipeline | P0 | Done (passes locally and in the pipeline) | J1 |
+| J4 | Third-party license texts shipped with the binaries | P0 | Done in the release archives (`THIRD-PARTY-NOTICES.md`, `LICENSE`, `README.md`), checked in `v0.1.0` | J2 |
 | J5 | Verified on a real Windows machine with the board | P0 | Done (Windows 10, 2026-10-17; see `testing.md`) | |
 | J6 | Installer or portable package for Windows | P1 | Planned | J2 |
 | J7 | Procedure to test on real hardware, kept in the repository | P1 | Done: `tests/hardware.rs` (ignored by default) | |

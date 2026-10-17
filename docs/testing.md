@@ -24,11 +24,11 @@ The port comes from `PAKESPEC_PORT` (default `/dev/ttyUSB0`). They check, on the
 
 ## Pipeline
 
-`.github/workflows/ci.yml` runs formatting, clippy and the first two layers on Ubuntu and Windows, plus `cargo deny check licenses bans advisories` (`deny.toml`). The pipeline has not run yet because the repository has not been published. The same deny check was run locally on 2026-10-17 and passes (licenses, bans, advisories; only duplicate-version warnings). Regenerate the notice file with `python3 tools/gen_third_party_notices.py` whenever dependencies change.
+`.github/workflows/ci.yml` runs formatting, clippy and the first two layers on Ubuntu and Windows, plus `cargo deny check licenses bans advisories` (`deny.toml`). The pipeline ran on GitHub on 2026-10-17 and passes on Ubuntu and Windows (the first run failed on a clippy lint introduced by a newer stable toolchain; see `next-steps.md`). The same deny check was run locally on 2026-10-17 and passes (licenses, bans, advisories; only duplicate-version warnings). Regenerate the notice file with `python3 tools/gen_third_party_notices.py` whenever dependencies change.
 
 ## Releases
 
-`.github/workflows/release.yml` runs when a tag such as `v0.1.0` is pushed: it builds `pakespec`, `pakespec-cli` and `pakespec-mcp` on Ubuntu and Windows, packs each platform into an archive with `LICENSE`, `THIRD-PARTY-NOTICES.md` and `README.md`, and creates a GitHub release with both archives. Never run yet; the Linux packaging steps were checked by hand.
+`.github/workflows/release.yml` runs when a tag such as `v0.1.0` is pushed: it builds `pakespec`, `pakespec-cli` and `pakespec-mcp` on Ubuntu and Windows, packs each platform into an archive with `LICENSE`, `THIRD-PARTY-NOTICES.md` and `README.md`, and creates a GitHub release with both archives. Ran for the tag `v0.1.0` on 2026-10-17 and attached both archives to the release.
 
 ## Windows check (2026-10-17)
 
