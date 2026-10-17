@@ -26,7 +26,7 @@ Next, in this order:
 
 Hardware reminders: the FY6900 is `/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0`, both outputs off (it may be powered on with 5 Vpp and outputs on: read `RMN`, `RFN` and `RMA`, switch the outputs off and set the amplitude before connecting anything). Never send unknown commands to the board (it goes silent until the USB cable is replugged).
 
-## Earlier state: end of at the end of 2026-10-16
+## State at the end of 2026-10-16 (earlier)
 
 Done today: FY6900 control (`calibration.md`), first dBm calibration (35 to 60 MHz), dBm on the screen with an `approximate dBm` badge outside the calibrated range, all hardware tests passing. Next, in this order:
 
