@@ -60,6 +60,7 @@ enum Act {
     CycleLanguage,
     ToggleCompact,
     GenToggle,
+    About,
 }
 
 struct Soft {
@@ -307,6 +308,7 @@ impl PakespecApp {
                     self.settings.compact_controls,
                     Act::ToggleCompact,
                 ),
+                plain("About", Act::About),
             ],
         }
     }
@@ -447,6 +449,7 @@ impl PakespecApp {
                 save = true;
             }
             Act::GenToggle => self.toggle_generator(ctx),
+            Act::About => self.show_about = true,
             Act::ToggleCompact => {
                 self.settings.compact_controls = !self.settings.compact_controls;
                 save = true;

@@ -51,6 +51,7 @@ pub struct PakespecApp {
     start_mhz: f64,
     stop_mhz: f64,
     points: u16,
+    show_about: bool,
 }
 
 impl PakespecApp {
@@ -103,6 +104,7 @@ impl PakespecApp {
             sweep_secs: None,
             status: String::new(),
             failed: false,
+            show_about: false,
         };
         if app.settings.port.is_none() {
             app.settings.port = ports::suggest(&app.ports).map(|p| p.path.clone());
@@ -110,6 +112,56 @@ impl PakespecApp {
         app.status = app.translator.tr("Ready").to_string();
         apply_theme(&cc.egui_ctx, &app.theme);
         app
+    }
+
+    /// The About window: version, author, copyright and license texts.
+    fn about_window(&mut self, ctx: &egui::Context) {
+        if !self.show_about {
+            return;
+        }
+        let mut open = true;
+        egui::Window::new(self.tr("About Pakespec"))
+            .open(&mut open)
+            .collapsible(false)
+            .default_width(460.0)
+            .show(ctx, |ui| {
+                ui.heading("Pakespec");
+                ui.label(format!(
+                    "{} {}",
+                    self.tr("Version"),
+                    env!("CARGO_PKG_VERSION")
+                ));
+                ui.label(self.tr("Control software for LTDZ 35-4400M spectrum analyzer boards"));
+                ui.separator();
+                ui.label(format!(
+                    "{}: Rodrigo Feliciano (pakequis)",
+                    self.tr("Author")
+                ));
+                ui.label("Copyright (c) 2026 Rodrigo Feliciano");
+                ui.hyperlink_to("github.com/pakequis", "https://github.com/pakequis");
+                ui.label(format!("{}: MIT", self.tr("License")));
+                ui.separator();
+                egui::CollapsingHeader::new(self.tr("License text")).show(ui, |ui| {
+                    egui::ScrollArea::vertical()
+                        .id_salt("license-text")
+                        .max_height(160.0)
+                        .show(ui, |ui| ui.label(include_str!("../../LICENSE")));
+                });
+                egui::CollapsingHeader::new(self.tr("Third-party licenses")).show(ui, |ui| {
+                    // The notices file is large: draw only the visible lines.
+                    let text = include_str!("../../THIRD-PARTY-NOTICES.md");
+                    let row_height = ui.text_style_height(&egui::TextStyle::Monospace);
+                    egui::ScrollArea::vertical()
+                        .id_salt("third-party")
+                        .max_height(220.0)
+                        .show_rows(ui, row_height, text.lines().count(), |ui, rows| {
+                            for line in text.lines().skip(rows.start).take(rows.len()) {
+                                ui.label(egui::RichText::new(line).monospace());
+                            }
+                        });
+                });
+            });
+        self.show_about = open;
     }
 
     fn tr<'a>(&'a self, text: &'a str) -> &'a str {
@@ -349,6 +401,9 @@ impl PakespecApp {
                     }
                 }
             }
+            if ui.button(self.tr("About")).clicked() {
+                self.show_about = true;
+            }
             ui.separator();
             ui.label(self.tr("Start (MHz)"));
             ui.add(
@@ -575,6 +630,7 @@ impl eframe::App for PakespecApp {
                     }
                 }
             });
+        self.about_window(ui.ctx());
     }
 }
 

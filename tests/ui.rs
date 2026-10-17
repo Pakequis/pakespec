@@ -248,3 +248,19 @@ fn compact_controls_can_return_to_the_front_panel() {
     click_first(&mut harness, "Compact controls");
     assert!(harness.query_by_label("Front panel").is_some());
 }
+
+#[test]
+fn the_about_window_shows_version_author_and_license() {
+    let mut harness = app();
+    harness.get_by_label("SYSTEM").click();
+    harness.run();
+    click_first(&mut harness, "About");
+    assert!(harness.query_by_label_contains("Version 0.").is_some());
+    assert!(
+        harness
+            .query_all_by_label_contains("Rodrigo Feliciano")
+            .count()
+            >= 2
+    );
+    assert!(harness.query_by_label_contains("License: MIT").is_some());
+}
