@@ -55,6 +55,21 @@ impl Trace {
         self.cursor = (end < self.level.len()).then_some(end);
     }
 
+    /// A copy of the trace with every level (and hold level) passed through `f`,
+    /// for showing the same data in other units. `f` must be increasing.
+    pub fn mapped(&self, f: impl Fn(f32) -> f32) -> Trace {
+        let map = |v: &[f32]| v.iter().map(|&x| f(x)).collect();
+        Trace {
+            params: self.params,
+            freq_mhz: self.freq_mhz.clone(),
+            level: map(&self.level),
+            max_hold: map(&self.max_hold),
+            min_hold: map(&self.min_hold),
+            filled: self.filled,
+            cursor: self.cursor,
+        }
+    }
+
     /// Total number of points of the sweep.
     pub fn total(&self) -> usize {
         self.level.len()
@@ -205,6 +220,17 @@ mod tests {
         );
         assert_eq!(t.peaks(3, 2), vec![1, 10, 5]);
         assert_eq!(t.peaks(1, 2), vec![1]);
+    }
+
+    #[test]
+    fn mapped_converts_levels_and_holds() {
+        let mut t = Trace::new(params());
+        t.apply(0, &samples(&[10, 20, 30, 40, 50]), 1);
+        let m = t.mapped(|v| v / 10.0);
+        assert_eq!(m.levels(), &[1.0, 2.0, 3.0, 4.0, 5.0]);
+        assert_eq!(m.max_hold()[4], 5.0);
+        assert_eq!(m.total(), 5);
+        assert_eq!(t.levels()[0], 10.0);
     }
 
     #[test]

@@ -10,6 +10,7 @@ mod panel;
 
 use eframe::egui;
 
+use crate::calibration::{self, Calibration};
 use crate::i18n::{LANGUAGES, Language, Translator};
 use crate::ports::{self, PortInfo};
 use crate::protocol::SweepParams;
@@ -33,6 +34,8 @@ pub struct PakespecApp {
     worker_source: Option<Source>,
     running: bool,
     trace: Option<Trace>,
+    /// dBm calibration of the board; the screen shows raw values without it.
+    calibration: Option<Calibration>,
     /// Parameters the worker is sweeping with right now.
     applied: Option<SweepParams>,
     scale: Option<Scale>,
@@ -57,7 +60,11 @@ impl PakespecApp {
             .as_deref()
             .map(Settings::load)
             .unwrap_or_default();
-        Self::with_settings(cc, settings, settings_path)
+        let mut app = Self::with_settings(cc, settings, settings_path);
+        app.calibration = calibration::default_path()
+            .as_deref()
+            .and_then(Calibration::load);
+        app
     }
 
     /// Creates the application with the given settings; they are saved to
@@ -82,6 +89,7 @@ impl PakespecApp {
             worker_source: None,
             running: false,
             trace: None,
+            calibration: None,
             applied: None,
             scale: None,
             panel: panel::PanelState::default(),
@@ -516,7 +524,12 @@ impl eframe::App for PakespecApp {
                     });
                 }
                 Some(trace) if trace.levels().is_empty() => {}
-                Some(trace) => {
+                Some(raw) => {
+                    let shown = self
+                        .calibration
+                        .as_ref()
+                        .map(|c| raw.mapped(|v| c.raw_to_dbm(f64::from(v)) as f32));
+                    let trace = shown.as_ref().unwrap_or(raw);
                     // Fit the scale to everything that is drawn.
                     let mut lo_hi = trace.range().unwrap_or((0.0, 1.0));
                     if self.settings.show_max_hold {
@@ -540,6 +553,8 @@ impl eframe::App for PakespecApp {
                     self.scale = Some(scale);
                     let cx = ViewContext {
                         trace,
+                        raw,
+                        calibration: self.calibration.as_ref(),
                         scale,
                         theme: &self.theme,
                         tr: &self.translator,

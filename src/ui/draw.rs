@@ -2,6 +2,7 @@
 
 use eframe::egui::{Align2, Color32, FontId, Painter, Pos2, Rect, Shape, Stroke};
 
+use crate::calibration::Calibration;
 use crate::i18n::Translator;
 use crate::scale::Scale;
 use crate::theme::Theme;
@@ -14,7 +15,11 @@ pub const COLUMNS: usize = 10;
 
 /// Everything a style needs to draw one frame.
 pub struct ViewContext<'a> {
+    /// The trace in display units: dBm when `calibration` is set, raw otherwise.
     pub trace: &'a Trace,
+    /// The same trace in raw detector values.
+    pub raw: &'a Trace,
+    pub calibration: Option<&'a Calibration>,
     pub scale: Scale,
     pub theme: &'a Theme,
     pub tr: &'a Translator,
@@ -27,6 +32,16 @@ pub struct ViewContext<'a> {
 }
 
 impl ViewContext<'_> {
+    /// `true` when the dBm values are an extrapolation of the calibration to
+    /// frequencies where it was not measured.
+    pub fn is_approximate(&self) -> bool {
+        self.calibration.is_some_and(|c| {
+            let f = &self.trace.freq_mhz;
+            let (lo, hi) = (f[0] * 1e6, f[f.len() - 1] * 1e6);
+            lo < c.min_freq_hz as f64 || hi > c.max_freq_hz as f64
+        })
+    }
+
     /// Parameter line: reference level, scale, averaging, sweep time.
     pub fn header_text(&self) -> String {
         let avg = if self.averaging <= 1 {
@@ -37,15 +52,28 @@ impl ViewContext<'_> {
         let time = self
             .sweep_secs
             .map_or("-".to_string(), |s| format!("{s:.2}"));
-        self.tr.tr_args(
+        let (unit, div_unit) = if self.calibration.is_some() {
+            (" dBm", " dB")
+        } else {
+            ("", "")
+        };
+        let mut text = self.tr.tr_args(
             "Ref {ref} · {div}/div · Avg {avg} · Sweep {time} s",
             &[
-                ("ref", &format!("{:.0}", self.scale.top)),
-                ("div", &format_step(self.scale.per_div)),
+                ("ref", &format!("{:.0}{unit}", self.scale.top)),
+                (
+                    "div",
+                    &format!("{}{div_unit}", format_step(self.scale.per_div)),
+                ),
                 ("avg", &avg),
                 ("time", &time),
             ],
-        )
+        );
+        if self.is_approximate() {
+            text.push_str(" · ");
+            text.push_str(self.tr.tr("approximate dBm"));
+        }
+        text
     }
 
     /// Frequency line: center, point count, span.
@@ -218,17 +246,105 @@ impl Plot<'_> {
         }
     }
 
-    /// Text such as `98.50 MHz  123` for a point.
+    /// Text such as `98.50 MHz  123` for a point, or `98.50 MHz  -21.4 dBm` when
+    /// calibrated. A `~` marks a value outside what the calibration measured.
     pub fn readout(&self, index: usize) -> String {
-        format!(
-            "{:.2} MHz  {:.0}",
-            self.cx.trace.freq_mhz[index],
-            self.cx.trace.levels()[index]
-        )
+        let mhz = self.cx.trace.freq_mhz[index];
+        let level = self.cx.trace.levels()[index];
+        match self.cx.calibration {
+            Some(c) => {
+                let raw = f64::from(self.cx.raw.levels()[index]);
+                let mark = if c.is_trusted(raw, (mhz * 1e6).round() as u64) {
+                    ""
+                } else {
+                    "~"
+                };
+                format!("{mhz:.2} MHz  {mark}{level:.1} dBm")
+            }
+            None => format!("{mhz:.2} MHz  {level:.0}"),
+        }
     }
 }
 
 /// Color `c` with the given opacity.
 pub fn with_alpha(c: Color32, alpha: u8) -> Color32 {
     Color32::from_rgba_unmultiplied(c.r(), c.g(), c.b(), alpha)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::i18n::Language;
+    use crate::protocol::{Sample, SweepParams};
+
+    fn calibration() -> Calibration {
+        Calibration {
+            counts_per_db: 10.0,
+            raw_at_0_dbm: 400.0,
+            min_raw: 200.0,
+            max_raw: 400.0,
+            min_freq_hz: 35_000_000,
+            max_freq_hz: 60_000_000,
+        }
+    }
+
+    /// Shows `raw` readings over `start..stop` Hz and returns (header, readout of point 0).
+    fn texts(start: u64, stop: u64, raw: u16, cal: Option<&Calibration>) -> (String, String) {
+        let mut trace = Trace::new(SweepParams::new(start, stop, 300).unwrap());
+        trace.apply(0, &[Sample { ch1: raw, ch2: raw }; 300], 1);
+        let shown = cal.map(|c| trace.mapped(|v| c.raw_to_dbm(f64::from(v)) as f32));
+        let theme = crate::theme::ThemeId::Dark.theme();
+        let tr = Translator::new(Language::En);
+        let cx = ViewContext {
+            trace: shown.as_ref().unwrap_or(&trace),
+            raw: &trace,
+            calibration: cal,
+            scale: Scale {
+                top: -10.0,
+                per_div: 10.0,
+                rows: ROWS,
+            },
+            theme: &theme,
+            tr: &tr,
+            show_max_hold: false,
+            show_min_hold: false,
+            averaging: 1,
+            sweep_secs: None,
+            marker: None,
+        };
+        let ctx = eframe::egui::Context::default();
+        let painter = ctx.layer_painter(eframe::egui::LayerId::background());
+        let plot = Plot {
+            painter: &painter,
+            rect: Rect::from_min_size(Pos2::ZERO, eframe::egui::vec2(100.0, 100.0)),
+            cx: &cx,
+        };
+        (cx.header_text(), plot.readout(0))
+    }
+
+    #[test]
+    fn raw_values_without_calibration() {
+        let (header, readout) = texts(35_000_000, 55_000_000, 300, None);
+        assert!(header.starts_with("Ref -10 · 10/div"));
+        assert!(readout.ends_with("300"));
+    }
+
+    #[test]
+    fn dbm_inside_the_calibrated_range() {
+        let c = calibration();
+        let (header, readout) = texts(35_000_000, 55_000_000, 300, Some(&c));
+        assert!(header.starts_with("Ref -10 dBm · 10 dB/div"));
+        assert!(!header.contains("approximate"));
+        assert!(readout.ends_with("-10.0 dBm") && !readout.contains('~'));
+    }
+
+    #[test]
+    fn extrapolated_values_are_marked() {
+        let c = calibration();
+        let (header, readout) = texts(35_000_000, 2_000_000_000, 300, Some(&c));
+        assert!(header.contains("approximate dBm"));
+        let (_, noise) = texts(35_000_000, 55_000_000, 150, Some(&c));
+        assert!(noise.contains("~-25.0 dBm"));
+        assert!(readout.contains("-10.0 dBm"));
+    }
 }

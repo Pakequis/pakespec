@@ -44,6 +44,10 @@ Nominal dBm assumes the FY6900 amplitude is accurate into 50 ohm (not verified w
 
 Every 1 MHz, 30 readings, at 50 mVpp and 200 mVpp: the readings stay within 253.3 to 255.3 and 358.3 to 359.0 raw (about +-0.1 dB). The detector is flat over the generator's whole range. Above 60 MHz the generator cannot go, so the response there (the through response in `serial-protocol.md` falls by about 2 dB per GHz on the cable) stays uncalibrated.
 
+## In the application
+
+If `calibration.toml` exists next to `settings.toml` (Linux: `~/.config/pakespec/`), the screen shows dBm: the reference level and scale per division are in dBm and dB, and the marker readout is in dBm. The line measured at 50 MHz is applied to every frequency (decision of 2026-10-16): when the trace goes outside 35 to 60 MHz the header adds `approximate dBm`, and a marker value outside the measured raw range (for example the noise floor) or frequencies gets a `~`. A manual scale saved in raw units is not converted when a calibration appears; switch to auto scale once. Create the file with `pakespec-cli --fit-calibration`.
+
 ## Open
 
 - Absolute accuracy: needs a check of the FY6900 amplitude with an oscilloscope on 50 ohm.
