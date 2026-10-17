@@ -81,7 +81,10 @@ impl PakespecApp {
             theme: settings.theme.theme(),
             start_mhz: settings.start_hz as f64 / 1e6,
             stop_mhz: settings.stop_hz as f64 / 1e6,
-            points: settings.points,
+            // A saved file may hold too few points for its range.
+            points: settings
+                .points
+                .max(SweepParams::min_points(settings.start_hz, settings.stop_hz)),
             settings,
             settings_path,
             ports,

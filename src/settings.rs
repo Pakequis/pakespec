@@ -107,7 +107,7 @@ impl Default for Settings {
             port: None,
             start_hz: 35_000_000,
             stop_hz: 4_400_000_000,
-            points: 401,
+            points: 438,
             averaging: 4,
             show_max_hold: false,
             show_min_hold: false,
@@ -213,6 +213,13 @@ mod tests {
         std::fs::write(&path, "theme = \"light\"\n").unwrap();
         let s = Settings::load(&path);
         assert_eq!(s.theme, ThemeId::Light);
-        assert_eq!(s.points, 401);
+        assert_eq!(s.points, 438);
+    }
+
+    #[test]
+    fn default_sweep_is_valid_for_the_board() {
+        let s = Settings::default();
+        let params = crate::protocol::SweepParams::new(s.start_hz, s.stop_hz, s.points);
+        assert!(params.is_ok(), "{params:?}");
     }
 }
