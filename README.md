@@ -4,17 +4,17 @@ Free, cross-platform (Linux and Windows) software to control the **LTDZ 35M-4400
 
 Why: the vendor software for this board is Windows-only and unmaintained, and there is no open, cross-platform client for it.
 
-## Status (2026-10-16)
+## Status (2026-10-17)
 
-Early stage, working on the real board. What exists:
+Early stage, working on the real board (Linux). Verification on Windows is still to do.
 
-- **Protocol confirmed** on the board from Linux (see `docs/serial-protocol.md`): sweep, measure and generator commands, the board multiplies every frequency by 10, steps wrap at 10 MHz.
-- A Rust core (protocol, board access, simulator, command-line sweep tool) with tests and a CI workflow, verified on the real board.
-- A first graphical application (egui): four selectable screen styles (Bench, Classic, Instrument, Modern) with ready-made presets, dark, light and phosphor themes, max and min hold traces, English and Portuguese, serial port selection with board detection. Levels are raw ADC values until the dBm calibration exists.
-- A generator screen (the tracking source, turned on by the S1 button on the board) and reception tested with an antenna (Wi-Fi and cellular bursts seen).
+- **Protocol confirmed** on the board (see `docs/serial-protocol.md`): sweep, measure and generator commands, the board multiplies every frequency by 10, steps wrap at 10 MHz.
+- **Rust core** (protocol, board access, simulator) with unit and integration tests, hardware tests that need a board, and a CI workflow.
+- **Graphical application** (egui): four selectable screen styles (Bench, Classic, Instrument, Modern) with ready-made presets, dark, light and phosphor themes, max and min hold traces, averaging, markers with peak search, English and Portuguese, serial port selection with board detection.
+- **Levels in dBm** from 35 to 60 MHz, calibrated with a function generator (`docs/calibration.md`). Elsewhere the same line is applied and the screen says `approximate dBm`. The generator amplitude was not checked with an oscilloscope, so absolute values are approximate. Without a calibration file the screen shows raw detector values.
+- **Generator screen** (the board's tracking source): sets a frequency and shows the reading through a cable from RF OUT to RF IN.
+- **For other programs:** a command-line tool with CSV and JSON output and a line-based server mode, and an MCP server for language models (`docs/automation.md`).
 - Hardware research and documented experiments on the board.
-
-Nothing has been published. The repository is local only.
 
 ## Where to read first
 
@@ -51,11 +51,11 @@ With the board on USB (CH340, `/dev/ttyUSB0` on Linux), a sweep printed as CSV (
 cargo run --release --bin pakespec-cli -- --port /dev/ttyUSB0 --start 35000000 --stop 1000000000 --points 101
 ```
 
-Without `--port`, the only USB serial converter that matches the board is used; `--list-ports` shows what was found. Add `--simulate` to run without a board. The generator needs the S1 button on the board turned on.
+Without `--port`, the only USB serial converter that matches the board is used; `--list-ports` shows what was found. Add `--simulate` to run without a board. Sweeps with the tracking source need the S1 button on the board turned on; a fixed-frequency output (`--generator`, `--measure`) works without it.
 
 For other programs: `--json` and `--measure HZ` print JSON, `--serve` keeps the board open and answers one JSON request per line, and `pakespec-mcp` is an MCP server for language models. See [`docs/automation.md`](docs/automation.md).
 
-Tests: `cargo test` needs no hardware. With the board connected, RF OUT cabled to RF IN and S1 on: `cargo test -- --ignored --test-threads=1`. Run the tests with `cargo test` (no hardware needed). If the board does not answer, unplug and replug the USB cable.
+Tests: `cargo test` needs no hardware. With the board connected, RF OUT cabled to RF IN and S1 on: `cargo test -- --ignored --test-threads=1`. If the board does not answer, unplug and replug the USB cable. Do not send unknown commands to the board: it stays silent until it is replugged.
 
 ## License
 

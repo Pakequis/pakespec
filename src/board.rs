@@ -153,8 +153,9 @@ impl<T: Read + Write> Board<T> {
     }
 
     /// Sets the board's frequency (0 Hz stops the output). The board sends no
-    /// reply. With the tracking source enabled by the S1 button, the output
-    /// carries a signal at this frequency, and `measure` reads it.
+    /// reply. The output carries a signal at this frequency (also with the S1
+    /// button off; S1 only gates the tracking signal during sweeps), and
+    /// `measure` reads it through a cable from RF OUT to RF IN.
     ///
     /// After the output was stopped the board ignores the first command that
     /// sets a frequency, so a frequency is sent twice.

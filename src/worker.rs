@@ -75,7 +75,7 @@ impl Worker {
 
     /// Turns the generator on at `freq_hz` (or changes its frequency) and reports
     /// detector readings at that frequency until `stop` or a sweep starts. The
-    /// output exists only while the S1 button on the board is on.
+    /// output is on whatever the S1 button says.
     pub fn generator_on(&self, freq_hz: u64) {
         let _ = self.commands.send(Command::Generator(Some(freq_hz)));
     }

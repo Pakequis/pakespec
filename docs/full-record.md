@@ -1,6 +1,6 @@
 # LTDZ 35-4400M board (spectrum analyzer and tracking generator): research record
 
-Hand-over document from the research phase, written when the Pakespec project was created on 2026-10-16. It gathers what was researched, the tools used, what was done and tested on the board, what was solved and what is still open. Anyone opening the project (person or AI assistant) should be able to continue from this document and the scripts in `experiments/`. The Rust code is in `src/`, and the Python client used during the research is `tools/ltdz_client.py`.
+Hand-over document from the research phase, written when the Pakespec project was created on 2026-10-17. It gathers what was researched, the tools used, what was done and tested on the board, what was solved and what is still open. Anyone opening the project should be able to continue from this document and the scripts in `experiments/`. The Rust code is in `src/`, and the Python client used during the research is `tools/ltdz_client.py`.
 
 ## 1. Summary
 
@@ -26,7 +26,7 @@ Machine: Ubuntu 26.04 (Linux 7.0), 12 cores, ~15 GB RAM.
 | Web search and fetch | Research on the LTDZ, ADF4351, alternative software (sources in section 9) |
 | Image reading | Photo of the board and manufacturer schematic |
 
-## 3. Timeline (2026-10-16)
+## 3. Timeline (2026-10-17)
 
 1. Hardware research through web search (Silicon Chip, Practical Electronics, EEVblog) and reading of the 2019 post.
 2. The manufacturer's package was found (photos, schematic and instructions).
@@ -59,7 +59,7 @@ Step = (stop − start) / (points − 1). Digits are zero-padded. The board acce
 
 ## 5. The "alternation" of the `x` command (solved)
 
-Observed repeatedly in the first sessions (scripts in `experiments/`):
+Observed repeatedly in the first experiments (scripts in `experiments/`):
 
 - Each `x` sweep command seemed to fire only if the previous one had been "ignored": one worked, the next did not, and so on. It held for any terminator (`\n`, space, `0x8F`, `\r`, `0x00`).
 - The `f000000000` command in the middle of the sequence also seemed to change that state. In a battery of 22 sweeps with `f000000000` after each one, all failed.
@@ -72,7 +72,7 @@ Observed repeatedly in the first sessions (scripts in `experiments/`):
 - Manufacturer specifications: RBW 5 to 120 kHz, more than 800 points per second, logarithmic dynamic range above 50 dB, input up to 10 dBm (the board recommends up to +5 dBm), tracking 120 kHz away from the local oscillator, button S1 turns the tracking on.
 - **P1, 4 pins at the top** (silkscreen "USART") is the STM32 **SWD** port (SWC and SWD). With an ST-Link it would be possible to read the firmware, if there is no readout protection. Check the exact pinout on the board before connecting.
 - External research: noise floor around −76 dBm, no input amplifier, fixed wide RBW, spurious peaks at ±25 and ±75 MHz from a 2.5 GHz signal.
-- RF connectors in use: RF OUT has nothing connected; RF IN has a ~10 cm dipole antenna (as of 2026-10-16; review if this changes).
+- RF connectors in use: RF OUT has nothing connected; RF IN has a ~10 cm dipole antenna (as of 2026-10-17; review if this changes).
 
 ## 7. How to talk to the board
 
@@ -82,7 +82,7 @@ Observed repeatedly in the first sessions (scripts in `experiments/`):
 
 ## 8. Linked goal: reference for the Anritsu power sensors
 
-The MA4701A and MA4702A sensors (RF power sensors found at a scrapyard) are calibrated on the original meter with 0 dBm at 50 MHz (and a 30 dB attenuator on the MA4702A). The tracking output of the LTDZ (about 0 dBm, constant, according to an external source) would be the reference. **The real level on the owner's board has not been measured yet.** Measure it with an attenuator at the input of another instrument (the LTDZ's own input accepts at most +5 dBm).
+The MA4701A and MA4702A sensors (RF power sensors found at a scrapyard) are calibrated on the original meter with 0 dBm at 50 MHz (and a 30 dB attenuator on the MA4702A). The tracking output of the LTDZ (about 0 dBm, constant, according to an external source) would be the reference. **The real level on the test unit has not been measured yet.** Measure it with an attenuator at the input of another instrument (the LTDZ's own input accepts at most +5 dBm).
 
 ## 9. Sources consulted
 

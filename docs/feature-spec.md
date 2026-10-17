@@ -1,6 +1,6 @@
 # Pakespec feature specification
 
-Draft for discussion, written on 2026-10-16. It lists what the application should do, what already exists, what blocks each item and what needs a decision. Items are grouped by area; each has an id so they can be discussed and tracked.
+Draft for discussion, written on 2026-10-17. It lists what the application should do, what already exists, what blocks each item and what needs a decision. Items are grouped by area; each has an id so they can be discussed and tracked.
 
 **Product goal:** free, cross-platform (Windows and Linux) software that makes the LTDZ 35-4400M board behave like a bench spectrum analyzer and tracking generator, with a screen and controls that feel like a real instrument.
 
@@ -61,7 +61,7 @@ These limits shape every feature. All were observed on the board (see `serial-pr
 | C2 | Manual reference level and scale per division | P0 | Done | |
 | C3 | Calibration to dBm from known levels | P0 | Partial: fit, conversion and calibration file in `src/calibration.rs`, dBm column in `pakespec-cli --calibration`; measured 35 to 60 MHz with the FY6900 (`calibration.md`); the screen shows dBm when a calibration file exists (`calibration.toml` next to `settings.toml`), with `approximate dBm` in the header when the trace goes outside the calibrated frequencies and `~` before a marker value that is outside the measured range | Oscilloscope check of the generator amplitude |
 | C4 | Calibration procedure inside the application, stored in a file per board | P1 | Planned | C3 |
-| C9 | **Automated calibration rig (idea, 2026-10-16).** The owner's function generator (FeelElec FY6900, DDS, up to 60 MHz) is controlled over its USB serial port by the test scripts, so the assistant can run the calibration without the owner present: steps the amplitude in known increments at 35, 50 and 60 MHz, reads the board at each step, and fits the slope (raw units per dB) and the absolute level near 50 MHz. It covers only 35 to 60 MHz. The same rig can supply the 0 dBm at 50 MHz reference for the Anritsu power sensors. Needs: the FY6900 connected by USB, its serial protocol read from its manual, a check of how its displayed amplitude relates to a 50 ohm load (oscilloscope with a 50 ohm termination at a low frequency), and strict limits in the script (start low, never above +5 dBm at the board input, output off at the end). | P1 | Idea | The FY6900 on USB; C3 |
+| C9 | **Automated calibration rig.** A FeelElec FY6900 function generator (DDS, up to 60 MHz) is controlled over its USB serial port by the test scripts, so the calibration runs without anyone present: steps the amplitude in known increments at 35, 50 and 60 MHz, reads the board at each step, and fits the slope (raw units per dB) and the absolute level near 50 MHz. It covers only 35 to 60 MHz. The same rig can supply the 0 dBm at 50 MHz reference for the Anritsu power sensors. Needs: the FY6900 connected by USB, its serial protocol read from its manual, a check of how its displayed amplitude relates to a 50 ohm load (oscilloscope with a 50 ohm termination at a low frequency), and strict limits in the script (start low, never above +5 dBm at the board input, output off at the end). | P1 | Done for 35 to 60 MHz (`calibration.md`); the amplitude check with an oscilloscope is open | The FY6900 on USB; C3 |
 | C5 | Display units dBm, dBµV, W | P2 | Planned | C3 |
 | C6 | Reference offset for an external attenuator or amplifier | P1 | Planned | C3 |
 | C7 | Correction table (for example antenna factor) | P2 | Planned | C3 |
@@ -119,7 +119,7 @@ Decided: no separate marker table and no waterfall. Readouts stay inside the plo
 
 ### K. Automation and integration (future)
 
-Requested by the owner on 2026-10-16 for later. Both are thin front ends over the same core library that the graphical application uses (`src/board.rs`, `protocol.rs`, `worker.rs`), so the core must not depend on the screen. Safety rules that apply to both: validate every frequency and point count (already done in `protocol.rs`), never expose a firmware update, never turn anything on by itself (the output only exists while S1 is on), and report the same errors as the application.
+Both are thin front ends over the same core library that the graphical application uses (`src/board.rs`, `protocol.rs`, `worker.rs`), so the core must not depend on the screen. Safety rules that apply to both: validate every frequency and point count (already done in `protocol.rs`), never expose a firmware update, never turn anything on by itself (the output only exists while S1 is on), and report the same errors as the application.
 
 | Id | Feature | Pri | Status | Depends on |
 |---|---|---|---|---|
@@ -173,7 +173,7 @@ Requested by the owner on 2026-10-16 for later. Both are thin front ends over th
 
 | Version | Contents | Goal |
 |---|---|---|
-| 0.1 | The owner's scope (2026-10-16): show the spectrum, the basic controls of an analyzer and a working generator. Everything P0 except the dBm calibration: A2, E2, H1, H2, J1, J2, J4, J5 (B5 and G2 are done) | A usable viewer and generator, safe to publish, with raw levels |
+| 0.1 | Scope (2026-10-17): show the spectrum, the basic controls of an analyzer and a working generator. Everything P0 except the dBm calibration: A2, E2, H1, H2, J1, J2, J4, J5 (B5 and G2 are done) | A usable viewer and generator, safe to publish, with raw levels |
 | 0.2 | C3, C4, C6, C8, E3, E4, E5, D3, D4, B6, B7 | Real measurements in dBm and a fuller instrument feel |
 | 0.3 | G3 and G4, the absolute output level (G1) | Filter response and a known generator level |
 | 0.4 | K1 | The application controlled from the command line and from other programs |
@@ -182,7 +182,7 @@ Requested by the owner on 2026-10-16 for later. Both are thin front ends over th
 
 ## 5. Decisions needed
 
-1. ~~Is publishing a 0.1 with raw levels acceptable?~~ **Answered 2026-10-16:** yes, the first release only has to show the spectrum, have the basic controls and a working generator.
+1. ~~Is publishing a 0.1 with raw levels acceptable?~~ **Answered 2026-10-17:** yes, the first release only has to show the spectrum, have the basic controls and a working generator.
 2. **Reference for the calibration and for G1:** which instrument is available (another analyzer, a power meter, a signal generator, a known attenuator)?
 3. **Span behavior at the board's limits:** should the span, like the center, keep its value and shrink the other, or keep shifting the range?
 4. **Zoom and pan with the mouse (F6):** needed, given the front panel?

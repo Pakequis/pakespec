@@ -46,8 +46,10 @@ pub fn show(
         rgb(theme.trace),
     );
     let hint = match last {
-        Some(v) if v <= NOISE_LIMIT => tr.tr("No signal: check that the S1 button is on."),
-        _ => tr.tr("The output needs the S1 button on the board to be on."),
+        Some(v) if v <= NOISE_LIMIT => {
+            tr.tr("No signal: check the cable from RF OUT to RF IN and that the output is on.")
+        }
+        _ => tr.tr("The output works without S1; sweeps with the tracking source need S1 on."),
     };
     let hint_color = match last {
         Some(v) if v <= NOISE_LIMIT => rgb(theme.marker),

@@ -2,8 +2,8 @@
 //!
 //! Speaks JSON-RPC 2.0, one message per line, and exposes the board through the
 //! tools of `automation::Session`. The generator tools are listed only when the
-//! session allows them, and they can only set the tracking-source frequency: the
-//! output itself is switched by the S1 button on the board.
+//! session allows them, and they can only set the tracking-source frequency (or
+//! stop it). Setting a frequency turns the output on, also with S1 off.
 
 use std::io::{self, BufRead, Write};
 

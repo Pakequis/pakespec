@@ -1,6 +1,6 @@
 # Serial protocol of the LTDZ 35-4400M
 
-Everything here was observed on the board; the tests that repeat it are in `tests/hardware.rs` (run with the board connected, see that file) and the scripts in `experiments/`. Frequencies in this document are **real** frequencies unless it says "command units". Last updated 2026-10-16.
+Everything here was observed on the board; the tests that repeat it are in `tests/hardware.rs` (run with the board connected, see that file) and the scripts in `experiments/`. Frequencies in this document are **real** frequencies unless it says "command units". Last updated 2026-10-17.
 
 ## Serial layer
 
@@ -65,7 +65,7 @@ Old statement, kept for the record: with S1 off nothing arrives at RF IN, whatev
 - Forty full-range sweeps of 438 points in a row all completed.
 - The raw values are not calibrated; the conversion to dBm is not known (see below).
 
-## Reception test with an antenna (2026-10-16)
+## Reception test with an antenna (2026-10-17)
 
 Setup: a dipole of about 10 cm on RF IN, nothing on RF OUT, tracking source off (S1). Receive-only sweeps with the Rust client, real frequencies, 12 to 50 sweeps with max-hold. Floor 146 to 153 raw (one isolated 182 in 1 to 2.5 GHz).
 
@@ -82,4 +82,4 @@ Planned approach: a line defined by two measurements (a known level and the same
 
 ## Experiments written before the frequency units were known
 
-The scripts in `experiments/` written before 2026-10-16 afternoon pass **command units** (real divided by 10) to the board but label them as real frequencies; read their frequencies multiplied by 10.
+The scripts in `experiments/` written before 2026-10-17 afternoon pass **command units** (real divided by 10) to the board but label them as real frequencies; read their frequencies multiplied by 10.

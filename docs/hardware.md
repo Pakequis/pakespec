@@ -2,7 +2,7 @@
 
 Sources: a photo of the board (2019 blog post), the manufacturer's schematic and instructions (not redistributed), and articles from Silicon Chip and Practical Electronics.
 
-## Identification of the owner's unit
+## Identification of the test unit
 
 Silkscreen: "35M-4400M Heterodyne Spectrum Analyzer, Onboard Tracking Source", LTDZ brand, date 2019-03-08, "RBW: 5k-120k", "RF IN recommend RFin <= +5dB". Shipped by Banggood for review in 2019. The hardware version (for example V5.0) is not written in the photo.
 

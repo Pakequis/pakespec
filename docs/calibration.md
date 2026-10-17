@@ -1,6 +1,6 @@
 # dBm calibration with the FY6900 function generator
 
-Status: in progress, first ladder measured on 2026-10-16.
+Status: in progress, first ladder measured on 2026-10-17.
 
 ## Setup
 
@@ -13,7 +13,7 @@ FeelElec FY6900-60M CH1 -> BNC cable -> SMA to BNC adapter -> RF IN of the LTDZ 
 - `UMO` model, `UID` id. Read: `RMF` frequency (Hz), `RMA` amplitude (units of 0.1 mV, so `100` is 10 mVpp), `RMW` waveform, `RMO` offset, `RMN` and `RFN` output state of CH1 and CH2 (`255` on, `0` off).
 - Write: `WMF` + 14 digits in microhertz (50 MHz is `WMF50000000000000`), `WMA0.010` amplitude in Vpp, `WMN1`/`WMN0` CH1 output, `WFN1`/`WFN0` CH2 output.
 
-## Amplitude ladder (50 MHz, 40 readings per level, 2026-10-16)
+## Amplitude ladder (50 MHz, 40 readings per level, 2026-10-17)
 
 Nominal dBm assumes the FY6900 amplitude is accurate into 50 ohm (not verified without an oscilloscope). The scripts cap the amplitude at 500 mVpp (about -2 dBm, 7 dB below the board input limit).
 
@@ -46,11 +46,11 @@ Every 1 MHz, 30 readings, at 50 mVpp and 200 mVpp: the readings stay within 253.
 
 ## In the application
 
-If `calibration.toml` exists next to `settings.toml` (Linux: `~/.config/pakespec/`), the screen shows dBm: the reference level and scale per division are in dBm and dB, and the marker readout is in dBm. The line measured at 50 MHz is applied to every frequency (decision of 2026-10-16): when the trace goes outside 35 to 60 MHz the header adds `approximate dBm`, and a marker value outside the measured raw range (for example the noise floor) or frequencies gets a `~`. A manual scale saved in raw units is not converted when a calibration appears; switch to auto scale once. Create the file with `pakespec-cli --fit-calibration`.
+If `calibration.toml` exists next to `settings.toml` (Linux: `~/.config/pakespec/`), the screen shows dBm: the reference level and scale per division are in dBm and dB, and the marker readout is in dBm. The line measured at 50 MHz is applied to every frequency (decision of 2026-10-17): when the trace goes outside 35 to 60 MHz the header adds `approximate dBm`, and a marker value outside the measured raw range (for example the noise floor) or frequencies gets a `~`. A manual scale saved in raw units is not converted when a calibration appears; switch to auto scale once. Create the file with `pakespec-cli --fit-calibration`.
 
-## Planned: levels above 60 MHz
+## Optional: levels above 60 MHz
 
-The FY6900 stops at 60 MHz. Plan (2026-10-17): SMA attenuators of known value between RF OUT and RF IN with the tracking source on, scans with `experiments/attenuator_scan.py` and a per-band fit with `experiments/attenuator_fit.py`. This gives the slope in counts per dB and the flatness of the whole chain above 60 MHz, not an absolute level; the absolute level stays tied to the FY6900 at 35 to 60 MHz. Steps in `next-steps.md`.
+The FY6900 stops at 60 MHz, so above it the same line is applied and marked `approximate dBm`. A way to measure the response there without another generator: SMA attenuators of known value (for example 10, 16, 20, 26, 30 and 36 dB, built from fixed parts) between RF OUT and RF IN with S1 on, one scan per value with `experiments/attenuator_scan.py DB`, then `experiments/attenuator_fit.py`. It prints the slope in counts per dB and the level change with frequency per band. This gives the flatness of the whole chain (cable and adapters included), not an absolute level, which stays tied to the FY6900 at 35 to 60 MHz. Check that two 10 dB parts in series agree with one 20 dB part to spot a bad attenuator. Not done yet: no attenuators were available.
 
 ## Open
 
