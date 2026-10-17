@@ -147,9 +147,9 @@ impl PakespecApp {
                     self.settings.scale_auto = false;
                 }
                 if f == Field::RefLevel {
-                    self.settings.scale_top = v as f32;
+                    self.settings.scale_top = crate::panel::round_level(v);
                 } else {
-                    self.settings.scale_div = (v as f32).max(0.1);
+                    self.settings.scale_div = crate::panel::round_level(v).max(0.1);
                 }
                 self.save_settings();
             }
@@ -163,7 +163,7 @@ impl PakespecApp {
                 format!("{v:.3} MHz")
             }
             Field::Points => format!("{v:.0}"),
-            Field::RefLevel | Field::ScaleDiv => format!("{v}"),
+            Field::RefLevel | Field::ScaleDiv => crate::panel::format_level(v),
         }
     }
 

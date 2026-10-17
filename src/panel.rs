@@ -201,6 +201,17 @@ impl Entry {
     }
 }
 
+/// Rounds a reference level or scale per division to thousandths of a dB, so
+/// that values kept as `f32` (0.1 is stored as 0.100000001...) do not show noise.
+pub fn round_level(v: f64) -> f32 {
+    ((v * 1000.0).round() / 1000.0) as f32
+}
+
+/// Text of a reference level or scale per division: no trailing noise digits.
+pub fn format_level(v: f64) -> String {
+    format!("{}", (v * 1000.0).round() / 1000.0)
+}
+
 /// How much one click of the knob changes `field`.
 pub fn knob_step(field: Field, range: Range, scale_div: f32) -> f64 {
     match field {
@@ -220,6 +231,14 @@ mod tests {
         start: 88.0,
         stop: 108.0,
     };
+
+    #[test]
+    fn levels_are_shown_without_float_noise() {
+        assert_eq!(format_level(f64::from(0.1_f32)), "0.1");
+        assert_eq!(format_level(f64::from(round_level(0.30000001192))), "0.3");
+        assert_eq!(format_level(-57.0), "-57");
+        assert_eq!(format_level(2.5), "2.5");
+    }
 
     #[test]
     fn center_and_span() {
